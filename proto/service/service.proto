@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option go_package = "me.mozhengxi.armyant/proto/service";
+option java_multiple_files = true;
+option java_package = "me.mozhengxi.armyant.proto.service";
+option java_outer_classname = "ProtoService";
+
+package grpc;
+
+import "google/protobuf/timestamp.proto";
+
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc WorkerRegister (RegisterRequest) returns (RegisterResponse) {}
+  rpc SendTask (TaskRequest) returns (TaskResponse) {}
+}
+
+/**
+* Worker register
+*/
+enum WorkerType {
+  LOCAL = 0;
+  IDC = 1;
+  REMOTE = 2;
+}
+message RegisterRequest {
+  string auth = 1;
+  WorkerType worker_type = 4;
+  string content = 8;
+  google.protobuf.Timestamp create_at = 12;
+}
+
+message RegisterResponse {
+  string broker_id = 1;
+  string worker_id = 4;
+  string broker_link = 8;
+  google.protobuf.Timestamp create_at = 12;
+}
+
+/**
+* Task request
+*/
+enum TaskType {
+  NOW = 0;
+  TIMED = 1;
+  SCHEDULED = 2;
+
+}
+message TaskRequest {
+  string id = 10;
+  TaskType type = 12;
+  Command cmd = 14;
+}
+message Command {
+  string app = 10;
+  repeated string args = 14;
+  repeated string env = 16;
+}
+message TaskResponse {
+  int32 status = 10;
+  string msg = 12;
+}
