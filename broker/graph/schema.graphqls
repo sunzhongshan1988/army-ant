@@ -1,0 +1,33 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# in the schema we will be doing Query and Mutations
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# These are the two queries we will be doing
+type Query {
+  characters: [Character!]!
+  search(name: String!): Character
+}
+
+# This is a mutation we will be doing
+type Mutation {
+  add(character: CharacterInput!): Character!
+}
+
+# just a input type for our mutation
+input CharacterInput {
+  name: String!
+  likes: Int!
+}
+
+# character schema
+type Character {
+  id: ID!
+  name: String!
+  likes: Int!
+}
