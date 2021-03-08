@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	pb "../../proto/service"
+	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
 const (

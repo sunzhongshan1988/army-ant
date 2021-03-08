@@ -9,7 +9,7 @@ import (
 	"log"
 	"net"
 
-	pb "../../proto/service"
+	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
 const (
@@ -40,9 +40,10 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	return res, nil
 }
 
-func Server() {
+func Grpc() {
 	// Start server
-	log.Printf("--Start Server")
+	log.Printf("--Start Grpc Server")
+
 	lis, err := net.Listen("tcp", serverPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

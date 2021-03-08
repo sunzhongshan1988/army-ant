@@ -22,8 +22,8 @@ package main
 import (
 	"log"
 
-	msg "./message"
-	svr "./server"
+	msg "github.com/sunzhongshan1988/army-ant/worker/message"
+	svr "github.com/sunzhongshan1988/army-ant/worker/server"
 )
 
 func main() {
@@ -31,5 +31,5 @@ func main() {
 
 	msg.Message()
 
-	svr.Server()
+	svr.Server_grpc()
 }

@@ -7,8 +7,8 @@ import (
 	"log"
 	"net"
 
-	pb "../../proto/service"
-	pf "../performer"
+	pb "github.com/sunzhongshan1988/army-ant/proto/service"
+	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
 )
 
 const (
@@ -45,7 +45,7 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	return res, nil
 }
 
-func Server() {
+func Server_grpc() {
 	// Start server
 	log.Printf("--Start Server")
 	lis, err := net.Listen("tcp", serverPort)
