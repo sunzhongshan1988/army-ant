@@ -12,3 +12,22 @@ type CharacterInput struct {
 	Name  string `json:"name"`
 	Likes int    `json:"likes"`
 }
+
+type Command struct {
+	App  string   `json:"app"`
+	Args []string `json:"args"`
+	Env  []string `json:"env"`
+}
+
+type Task struct {
+	Status int    `json:"status"`
+	Msg    string `json:"msg"`
+}
+
+type TaskInput struct {
+	ID       string   `json:"id"`
+	BrokerID string   `json:"broker_id"`
+	WorkerID string   `json:"worker_id"`
+	Type     string   `json:"type"`
+	Cmd      *Command `json:"cmd"`
+}

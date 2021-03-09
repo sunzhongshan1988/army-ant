@@ -3,7 +3,6 @@ package message
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -15,7 +14,7 @@ const (
 	workerAddress = "localhost:50052"
 )
 
-func SendTask() {
+func SendTask(request *pb.TaskRequest) {
 	// Set up a connection to the broker.
 	conn, err1 := grpc.Dial(workerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {
@@ -26,15 +25,7 @@ func SendTask() {
 
 	// Contact the broker and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	request := &pb.TaskRequest{
-		Id:   uuid.New().String(),
-		Type: pb.TaskType_NOW,
-		Cmd: &pb.Command{
-			App:  "adb",
-			Args: []string{"version"},
-			Env:  []string{""},
-		},
-	}
+
 	defer cancel()
 	r, err2 := c.SendTask(ctx, request)
 	if err2 != nil {

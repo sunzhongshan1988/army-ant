@@ -31,5 +31,5 @@ func main() {
 
 	msg.Message()
 
-	svr.Server_grpc()
+	svr.Grpc()
 }

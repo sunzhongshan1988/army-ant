@@ -45,7 +45,7 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	return res, nil
 }
 
-func Server_grpc() {
+func Grpc() {
 	// Start server
 	log.Printf("--Start Server")
 	lis, err := net.Listen("tcp", serverPort)

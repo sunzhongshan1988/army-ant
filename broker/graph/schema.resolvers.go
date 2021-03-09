@@ -5,7 +5,11 @@ package graph
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	msg "github.com/sunzhongshan1988/army-ant/broker/message"
+	pb "github.com/sunzhongshan1988/army-ant/proto/service"
+	"log"
 	"math/rand"
 	"strings"
 
@@ -22,6 +26,31 @@ func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInp
 
 	r.characters = append(r.characters, charac)
 	return charac, nil
+}
+
+func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.Task, error) {
+	jsonStr, _ := json.Marshal(task)
+	log.Printf("Received: %v", jsonStr)
+
+	request := &pb.TaskRequest{
+		Id:   task.ID,
+		Type: pb.TaskType_NOW,
+		Cmd: &pb.Command{
+			App:  task.Cmd.App,
+			Args: task.Cmd.Args,
+			Env:  task.Cmd.Env,
+		},
+	}
+
+	msg.SendTask(request)
+
+	answer := &model.Task{
+		Status: 0,
+		Msg:    "ok",
+	}
+
+	r.tasks = append(r.tasks, answer)
+	return answer, nil
 }
 
 func (r *queryResolver) Characters(ctx context.Context) ([]*model.Character, error) {

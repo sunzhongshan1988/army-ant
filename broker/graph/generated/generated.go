@@ -50,17 +50,24 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Add func(childComplexity int, character model.CharacterInput) int
+		Add         func(childComplexity int, character model.CharacterInput) int
+		ReceiveTask func(childComplexity int, task *model.TaskInput) int
 	}
 
 	Query struct {
 		Characters func(childComplexity int) int
 		Search     func(childComplexity int, name string) int
 	}
+
+	Task struct {
+		Msg    func(childComplexity int) int
+		Status func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
 	Add(ctx context.Context, character model.CharacterInput) (*model.Character, error)
+	ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.Task, error)
 }
 type QueryResolver interface {
 	Characters(ctx context.Context) ([]*model.Character, error)
@@ -115,6 +122,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Add(childComplexity, args["character"].(model.CharacterInput)), true
 
+	case "Mutation.receive_task":
+		if e.complexity.Mutation.ReceiveTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_receive_task_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ReceiveTask(childComplexity, args["task"].(*model.TaskInput)), true
+
 	case "Query.characters":
 		if e.complexity.Query.Characters == nil {
 			break
@@ -133,6 +152,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Search(childComplexity, args["name"].(string)), true
+
+	case "Task.msg":
+		if e.complexity.Task.Msg == nil {
+			break
+		}
+
+		return e.complexity.Task.Msg(childComplexity), true
+
+	case "Task.status":
+		if e.complexity.Task.Status == nil {
+			break
+		}
+
+		return e.complexity.Task.Status(childComplexity), true
 
 	}
 	return 0, false
@@ -217,6 +250,7 @@ type Query {
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
+  receive_task(task: TaskInput): Task!
 }
 
 # just a input type for our mutation
@@ -231,7 +265,24 @@ type Character {
   name: String!
   likes: Int!
 }
-`, BuiltIn: false},
+
+# receive a task
+input TaskInput {
+  id: String!
+  broker_id: String!
+  worker_id: String!
+  type: String!
+  cmd: Command!
+}
+input Command {
+  app: String!
+  args: [String!]!
+  env: [String!]!
+}
+type Task {
+  status: Int!
+  msg: String!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -251,6 +302,21 @@ func (ec *executionContext) field_Mutation_add_args(ctx context.Context, rawArgs
 		}
 	}
 	args["character"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_receive_task_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.TaskInput
+	if tmp, ok := rawArgs["task"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("task"))
+		arg0, err = ec.unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTaskInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["task"] = arg0
 	return args, nil
 }
 
@@ -469,6 +535,48 @@ func (ec *executionContext) _Mutation_add(ctx context.Context, field graphql.Col
 	return ec.marshalNCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐCharacter(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_receive_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_receive_task_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ReceiveTask(rctx, args["task"].(*model.TaskInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Task)
+	fc.Result = res
+	return ec.marshalNTask2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTask(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_characters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -612,6 +720,76 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_status(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Task_msg(ctx context.Context, field graphql.CollectedField, obj *model.Task) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Task",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Msg, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1729,6 +1907,94 @@ func (ec *executionContext) unmarshalInputCharacterInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputCommand(ctx context.Context, obj interface{}) (model.Command, error) {
+	var it model.Command
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "app":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("app"))
+			it.App, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "args":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("args"))
+			it.Args, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "env":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
+			it.Env, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj interface{}) (model.TaskInput, error) {
+	var it model.TaskInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			it.ID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "broker_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("broker_id"))
+			it.BrokerID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "worker_id":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("worker_id"))
+			it.WorkerID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cmd":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cmd"))
+			it.Cmd, err = ec.unmarshalNCommand2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐCommand(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1794,6 +2060,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "receive_task":
+			out.Values[i] = ec._Mutation_receive_task(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1849,6 +2120,38 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var taskImplementors = []string{"Task"}
+
+func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj *model.Task) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, taskImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Task")
+		case "status":
+			out.Values[i] = ec._Task_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "msg":
+			out.Values[i] = ec._Task_msg(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2176,6 +2479,11 @@ func (ec *executionContext) unmarshalNCharacterInput2githubᚗcomᚋsunzhongshan
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCommand2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐCommand(ctx context.Context, v interface{}) (*model.Command, error) {
+	res, err := ec.unmarshalInputCommand(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2219,6 +2527,50 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTask2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v model.Task) graphql.Marshaler {
+	return ec._Task(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTask2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v *model.Task) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Task(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2503,6 +2855,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTaskInput(ctx context.Context, v interface{}) (*model.TaskInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTaskInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

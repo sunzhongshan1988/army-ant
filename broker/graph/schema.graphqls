@@ -17,6 +17,7 @@ type Query {
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
+  receive_task(task: TaskInput): Task!
 }
 
 # just a input type for our mutation
@@ -30,4 +31,22 @@ type Character {
   id: ID!
   name: String!
   likes: Int!
+}
+
+# receive a task
+input TaskInput {
+  id: String!
+  broker_id: String!
+  worker_id: String!
+  type: String!
+  cmd: Command!
+}
+input Command {
+  app: String!
+  args: [String!]!
+  env: [String!]!
+}
+type Task {
+  status: Int!
+  msg: String!
 }
