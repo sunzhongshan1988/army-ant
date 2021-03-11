@@ -7,14 +7,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	msg "github.com/sunzhongshan1988/army-ant/broker/message"
-	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"log"
 	"math/rand"
 	"strings"
 
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/model"
+	msg "github.com/sunzhongshan1988/army-ant/broker/message"
+	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
 func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInput) (*model.Character, error) {

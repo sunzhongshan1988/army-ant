@@ -1,7 +1,7 @@
 package performer
 
 import (
-	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -13,26 +13,37 @@ type Input struct {
 	Env  []string
 }
 
-type Output struct {
-	StdoutPipeOut io.ReadCloser
-	StdoutPipeErr error
-}
+func Standard(input Input) error {
+	var out string
 
-func Standard(input Input) Output {
 	cmd := exec.Command(input.App, input.Args...)
 	cmd.Env = append(os.Environ(), input.Env...)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Fatal(err)
+
+	stdout, errSo := cmd.StdoutPipe()
+	if errSo != nil {
+		log.Fatal(errSo)
 	}
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
+
+	stderr, errSe := cmd.StderrPipe()
+	if errSe != nil {
+		log.Fatal(errSe)
 	}
-	if err := cmd.Wait(); err != nil {
-		log.Fatal(err)
+
+	errStt := cmd.Start()
+	if errStt != nil {
+		b, _ := ioutil.ReadAll(stderr)
+		out = string(b)
+		// stdoutReader.ReadRune()
+	} else {
+		b, _ := ioutil.ReadAll(stdout)
+		out = string(b)
 	}
-	return Output{
-		StdoutPipeOut: stdout,
-		StdoutPipeErr: err,
+
+	if errWt := cmd.Wait(); errWt != nil {
+		log.Fatal(errWt)
 	}
+
+	log.Printf("command out: %v", out)
+
+	return errStt
 }

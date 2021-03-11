@@ -34,14 +34,19 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 		Args: in.Cmd.Args,
 		Env:  in.Cmd.Env,
 	}
-	output := pf.Standard(input)
-	log.Printf("cmd-out: %v", output.StdoutPipeOut)
-	log.Printf("cmd-err: %v", output.StdoutPipeErr)
 
 	res := &pb.TaskResponse{
 		Status: 1,
 		Msg:    "ok",
 	}
+
+	err := pf.Standard(input)
+	if err != nil {
+		res.Status = 1
+		res.Msg = "commmand error"
+		return res, nil
+	}
+
 	return res, nil
 }
 
