@@ -272,12 +272,7 @@ input TaskInput {
   broker_id: String!
   worker_id: String!
   type: String!
-  cmd: Command!
-}
-input Command {
-  app: String!
-  args: [String!]!
-  env: [String!]!
+  dna: String!
 }
 type Task {
   status: Int!
@@ -1907,42 +1902,6 @@ func (ec *executionContext) unmarshalInputCharacterInput(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCommand(ctx context.Context, obj interface{}) (model.Command, error) {
-	var it model.Command
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "app":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("app"))
-			it.App, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "args":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("args"))
-			it.Args, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "env":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
-			it.Env, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj interface{}) (model.TaskInput, error) {
 	var it model.TaskInput
 	var asMap = obj.(map[string]interface{})
@@ -1981,11 +1940,11 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 			if err != nil {
 				return it, err
 			}
-		case "cmd":
+		case "dna":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cmd"))
-			it.Cmd, err = ec.unmarshalNCommand2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐCommand(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dna"))
+			it.Dna, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2479,11 +2438,6 @@ func (ec *executionContext) unmarshalNCharacterInput2githubᚗcomᚋsunzhongshan
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCommand2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐCommand(ctx context.Context, v interface{}) (*model.Command, error) {
-	res, err := ec.unmarshalInputCommand(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2527,36 +2481,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNTask2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋgraphᚋmodelᚐTask(ctx context.Context, sel ast.SelectionSet, v model.Task) graphql.Marshaler {

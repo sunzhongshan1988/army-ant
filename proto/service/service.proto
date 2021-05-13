@@ -51,7 +51,11 @@ enum TaskType {
 message TaskRequest {
   string id = 10;
   TaskType type = 12;
-  Command cmd = 14;
+  DNA dna = 14;
+}
+message DNA {
+  Command cmd = 10;
+  string version = 12;
 }
 message Command {
   string app = 10;

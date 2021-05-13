@@ -39,12 +39,7 @@ input TaskInput {
   broker_id: String!
   worker_id: String!
   type: String!
-  cmd: Command!
-}
-input Command {
-  app: String!
-  args: [String!]!
-  env: [String!]!
+  dna: String!
 }
 type Task {
   status: Int!

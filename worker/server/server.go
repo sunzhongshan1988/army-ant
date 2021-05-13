@@ -30,9 +30,9 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	log.Printf("Task: %v", jsonStr)
 
 	input := pf.Input{
-		App:  in.Cmd.App,
-		Args: in.Cmd.Args,
-		Env:  in.Cmd.Env,
+		App:  in.Dna.Cmd.App,
+		Args: in.Dna.Cmd.Args,
+		Env:  in.Dna.Cmd.Env,
 	}
 
 	res := &pb.TaskResponse{
