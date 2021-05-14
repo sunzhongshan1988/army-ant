@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -33,8 +34,9 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	log.Printf("Received: %v", jsonStr)
 
 	// Processing task DNA.
+	sDec, _ := b64.StdEncoding.DecodeString(task.Dna)
 	var m model.DNA
-	err := json.Unmarshal([]byte(task.Dna), &m)
+	err := json.Unmarshal([]byte(sDec), &m)
 	if err != nil {
 		log.Printf("[error]DNA: %v", err)
 	}
