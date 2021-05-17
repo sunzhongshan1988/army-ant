@@ -29,12 +29,12 @@ func SendTask(request *pb.TaskRequest) {
 	defer cancel()
 	r, err2 := c.SendTask(ctx, request)
 	if err2 != nil {
-		log.Fatalf("could not greet: %v", err2)
+		log.Fatalf("Error: could not greet: %v", err2)
 	}
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(r)
-	log.Printf("Greeting: %s", jsonStr)
+	log.Printf("Worker Response: %s", jsonStr)
 }

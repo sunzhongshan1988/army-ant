@@ -29,7 +29,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(in)
-	log.Printf("Received: %v", jsonStr)
+	log.Printf("Worker Register: %v", jsonStr)
 
 	res := &pb.RegisterResponse{
 		BrokerId:   brokerId,

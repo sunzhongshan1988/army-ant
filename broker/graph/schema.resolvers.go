@@ -31,7 +31,7 @@ func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInp
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.Task, error) {
 	jsonStr, _ := json.Marshal(task)
-	log.Printf("Received: %v", jsonStr)
+	log.Printf("Received Task: %v", string(jsonStr))
 
 	// Processing task DNA.
 	sDec, _ := b64.StdEncoding.DecodeString(task.Dna)
