@@ -5,6 +5,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	mongo "github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
+	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -23,7 +25,7 @@ type server struct {
 
 // WorkerRegister implements WorkerRegister.GreeterServer
 func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	brokerId := uuid.New().String()
+
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
 		OrigName:     true,
@@ -31,11 +33,31 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	jsonStr, _ := m.MarshalToString(in)
 	log.Printf("Worker Register: %v", jsonStr)
 
-	res := &pb.RegisterResponse{
+	brokerId := uuid.New().String()
+	workerId := uuid.New().String()
+
+	worker := model.WorkerRegister{
 		BrokerId:   brokerId,
-		WorkerId:   uuid.New().String(),
 		BrokerLink: "192.168.12.233:8088",
-		CreateAt:   ptypes.TimestampNow(),
+		WorkerId:   workerId,
+		WorkerLink: in.WorkerLink,
+		CreateAt:   in.CreateAt,
+		UpdateAt:   ptypes.TimestampNow(),
+	}
+
+	// Save to mongoDB
+	collection := mongo.GetCollection("worker")
+	insertResult, err := collection.InsertOne(mongo.Ctx, worker)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("MongoDB Save: %v", insertResult.InsertedID)
+
+	res := &pb.RegisterResponse{
+		BrokerId:   worker.BrokerId,
+		WorkerId:   worker.WorkerId,
+		BrokerLink: worker.BrokerLink,
+		CreateAt:   worker.CreateAt,
 	}
 	return res, nil
 }

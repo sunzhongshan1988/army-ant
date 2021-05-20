@@ -29,6 +29,7 @@ func Message() {
 	request := &pb.RegisterRequest{
 		Auth:       "#shdk687dHHhiJHDHDHH",
 		WorkerType: pb.WorkerType_IDC,
+		WorkerLink: "127.0.0.1:50052",
 		Content:    "",
 		CreateAt:   ptypes.TimestampNow(),
 	}
@@ -42,6 +43,6 @@ func Message() {
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(r)
-	log.Printf("Greeting: %s", jsonStr)
+	log.Printf("Broker Response: %s", jsonStr)
 
 }

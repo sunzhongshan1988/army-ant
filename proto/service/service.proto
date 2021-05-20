@@ -29,6 +29,7 @@ message RegisterRequest {
   string auth = 1;
   WorkerType worker_type = 4;
   string content = 8;
+  string worker_link = 10;
   google.protobuf.Timestamp create_at = 12;
 }
 
@@ -46,7 +47,6 @@ enum TaskType {
   NOW = 0;
   TIMED = 1;
   SCHEDULED = 2;
-
 }
 message TaskRequest {
   string id = 10;
