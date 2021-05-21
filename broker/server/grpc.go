@@ -5,8 +5,8 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
-	mongo "github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
+	"github.com/sunzhongshan1988/army-ant/broker/repository"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -21,6 +21,7 @@ const (
 // server is used to implement server.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
+	workerRepo repository.WorkerRepository
 }
 
 // WorkerRegister implements WorkerRegister.GreeterServer
@@ -36,7 +37,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	brokerId := uuid.New().String()
 	workerId := uuid.New().String()
 
-	worker := model.WorkerRegister{
+	worker := &model.WorkerRegister{
 		BrokerId:   brokerId,
 		BrokerLink: "192.168.12.233:8088",
 		WorkerId:   workerId,
@@ -46,12 +47,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	}
 
 	// Save to mongoDB
-	collection := mongo.GetCollection("worker")
-	insertResult, err := collection.InsertOne(mongo.Ctx, worker)
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("MongoDB Save: %v", insertResult.InsertedID)
+	_, _ = s.workerRepo.InsertOne(ctx, worker)
 
 	res := &pb.RegisterResponse{
 		BrokerId:   worker.BrokerId,
