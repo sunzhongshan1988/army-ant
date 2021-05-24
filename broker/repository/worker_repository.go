@@ -7,17 +7,17 @@ import (
 	"log"
 )
 
-type WorkerRepository interface {
+type workerRepository interface {
 	InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
 }
 
-type workerRepository struct {
-	client *mongo.Client
+type WorkerRepository struct {
+	Client *mongo.Client
 }
 
-func (r *workerRepository) InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
+func (r *WorkerRepository) InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.client.Database("armyant").Collection("worker").InsertOne(ctx, worker)
+	insertResult, err := r.Client.Database("armyant").Collection("worker").InsertOne(ctx, worker)
 
 	if err != nil {
 		log.Fatal(err)

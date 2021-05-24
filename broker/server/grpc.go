@@ -6,7 +6,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
-	"github.com/sunzhongshan1988/army-ant/broker/repository"
+	"github.com/sunzhongshan1988/army-ant/broker/service"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -21,7 +21,7 @@ const (
 // server is used to implement server.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
-	workerRepo repository.WorkerRepository
+	workerService service.WorkerService
 }
 
 // WorkerRegister implements WorkerRegister.GreeterServer
@@ -46,8 +46,8 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		UpdateAt:   ptypes.TimestampNow(),
 	}
 
-	// Save to mongoDB
-	_, _ = s.workerRepo.InsertOne(ctx, worker)
+	// Save to
+	_, _ = s.workerService.InsertOne(worker)
 
 	res := &pb.RegisterResponse{
 		BrokerId:   worker.BrokerId,
