@@ -11,6 +11,6 @@ type WorkerRegister struct {
 	BrokerLink string                 `bson:"broker_link,omitempty"`
 	WorkerId   string                 `bson:"worker_id,omitempty"`
 	WorkerLink string                 `bson:"worker_link,omitempty"`
-	CreateAt   *timestamppb.Timestamp `bson:"create_at,omitempty"`
-	UpdateAt   *timestamppb.Timestamp `bson:"update_at,omitempty"`
+	CreateAt   *timestamppb.Timestamp `bson:"create_at"`
+	UpdateAt   *timestamppb.Timestamp `bson:"update_at"`
 }

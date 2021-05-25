@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-var client *mongo.Client
+var Client *mongo.Client
 
-func Init() {
+func Init() *mongo.Client {
 
 	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/armyant?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
 
@@ -19,23 +19,20 @@ func Init() {
 	defer cancel()
 
 	var err error
-	client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
+	//defer func() {
+	//	if err = Client.Disconnect(ctx); err != nil {
+	//		panic(err)
+	//	}
+	//}()
 	// Ping the primary
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+	if err := Client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	}
 	log.Printf("MongoDB: Successfully connected and pinged.")
 
-}
-
-func GetClient() *mongo.Client {
-	return client
+	return Client
 }

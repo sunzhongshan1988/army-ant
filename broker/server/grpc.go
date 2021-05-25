@@ -21,11 +21,12 @@ const (
 // server is used to implement server.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
-	workerService service.WorkerService
 }
 
 // WorkerRegister implements WorkerRegister.GreeterServer
 func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+
+	var workerService = service.WorkerService{}
 
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -47,7 +48,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	}
 
 	// Save to
-	_, _ = s.workerService.InsertOne(worker)
+	_, _ = workerService.InsertOne(worker)
 
 	res := &pb.RegisterResponse{
 		BrokerId:   worker.BrokerId,

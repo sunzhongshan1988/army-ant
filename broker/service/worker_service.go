@@ -5,14 +5,27 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/repository"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type workerService interface {
+	InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
+	/*
+	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
+	 */
+	FindById(filter bson.M) (*model.WorkerRegister, error)
+}
 
 type WorkerService struct {
 }
 
-var repo = repository.WorkerRepository{Client: mongodb.GetClient()}
-
 func (s *WorkerService) InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
-	return repo.InsertOne(context.TODO(), worker)
+	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
+	return workerRepo.InsertOne(context.TODO(), worker)
+}
+
+func (s *WorkerService) FindById(filter bson.M) (*model.WorkerRegister, error) {
+	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
+	return workerRepo.FindById(context.TODO(), filter)
 }
