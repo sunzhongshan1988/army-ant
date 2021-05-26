@@ -40,12 +40,7 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 		Msg:    "ok",
 	}
 
-	err := pf.Standard(input)
-	if err != nil {
-		res.Status = 1
-		res.Msg = "commmand error"
-		return res, nil
-	}
+	go pf.Standard(input)
 
 	return res, nil
 }

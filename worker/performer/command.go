@@ -13,7 +13,7 @@ type Input struct {
 	Env  []string
 }
 
-func Standard(input Input) error {
+func Standard(input Input) {
 	var out string
 
 	cmd := exec.Command(input.App, input.Args...)
@@ -44,6 +44,4 @@ func Standard(input Input) error {
 	}
 
 	log.Printf("command out: %v", out)
-
-	return errStt
 }
