@@ -1,9 +1,8 @@
-package message
+package grpc
 
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -12,12 +11,12 @@ import (
 )
 
 const (
-	brokerAddress = "localhost:50051"
+	workerAddress = "localhost:50052"
 )
 
-func Message() {
+func SendTask(request *pb.TaskRequest) {
 	// Set up a connection to the broker.
-	conn, err1 := grpc.Dial(brokerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err1 := grpc.Dial(workerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {
 		log.Fatalf("did not connect: %v", err1)
 	}
@@ -26,23 +25,16 @@ func Message() {
 
 	// Contact the broker and print out its response.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	request := &pb.RegisterRequest{
-		Auth:       "#shdk687dHHhiJHDHDHH",
-		WorkerType: pb.WorkerType_IDC,
-		WorkerLink: "127.0.0.1:50052",
-		Content:    "",
-		CreateAt:   ptypes.TimestampNow(),
-	}
 	defer cancel()
-	r, err2 := c.WorkerRegister(ctx, request)
+
+	r, err2 := c.SendTask(ctx, request)
 	if err2 != nil {
-		log.Fatalf("could not greet: %v", err2)
+		log.Fatalf("Error: could not greet: %v", err2)
 	}
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(r)
-	log.Printf("Broker Response: %s", jsonStr)
-
+	log.Printf("Worker Response: %s", jsonStr)
 }

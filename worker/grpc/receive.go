@@ -1,18 +1,11 @@
-package server
+package grpc
 
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
-	"google.golang.org/grpc"
-	"log"
-	"net"
-
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
-)
-
-const (
-	serverPort = ":50052"
+	"log"
 )
 
 // server is used to implement server.GreeterServer.
@@ -43,18 +36,4 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	go pf.Standard(input)
 
 	return res, nil
-}
-
-func Grpc() {
-	// Start server
-	log.Printf("--Start Server")
-	lis, err := net.Listen("tcp", serverPort)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	pb.RegisterGreeterServer(s, &server{})
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
 }

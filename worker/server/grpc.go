@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	serverPort = ":50051"
+	serverPort = ":50052"
 )
 
 // server is used to implement server.GreeterServer.
@@ -19,8 +19,7 @@ type server struct {
 
 func Grpc() {
 	// Start server
-	log.Printf("--Start Grpc Server")
-
+	log.Printf("--Start Server")
 	lis, err := net.Listen("tcp", serverPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

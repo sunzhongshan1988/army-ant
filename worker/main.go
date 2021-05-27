@@ -20,16 +20,18 @@
 package main
 
 import (
+	"github.com/sunzhongshan1988/army-ant/worker/config"
 	"log"
 
-	msg "github.com/sunzhongshan1988/army-ant/worker/message"
 	svr "github.com/sunzhongshan1988/army-ant/worker/server"
 )
 
 func main() {
 	log.Printf("------------Worker Started!------------")
 
-	msg.Message()
+	config.Init()
+
+	//grpc.Register()
 
 	svr.Grpc()
 }

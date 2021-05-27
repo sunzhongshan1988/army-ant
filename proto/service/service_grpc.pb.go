@@ -18,8 +18,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreeterClient interface {
-	// Sends a greeting
+	// Broker
 	WorkerRegister(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+	TaskResult(ctx context.Context, in *TaskResultRequest, opts ...grpc.CallOption) (*TaskResultResponse, error)
+	// Worker
 	SendTask(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 }
 
@@ -40,6 +42,15 @@ func (c *greeterClient) WorkerRegister(ctx context.Context, in *RegisterRequest,
 	return out, nil
 }
 
+func (c *greeterClient) TaskResult(ctx context.Context, in *TaskResultRequest, opts ...grpc.CallOption) (*TaskResultResponse, error) {
+	out := new(TaskResultResponse)
+	err := c.cc.Invoke(ctx, "/grpc.Greeter/TaskResult", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *greeterClient) SendTask(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
 	out := new(TaskResponse)
 	err := c.cc.Invoke(ctx, "/grpc.Greeter/SendTask", in, out, opts...)
@@ -53,8 +64,10 @@ func (c *greeterClient) SendTask(ctx context.Context, in *TaskRequest, opts ...g
 // All implementations must embed UnimplementedGreeterServer
 // for forward compatibility
 type GreeterServer interface {
-	// Sends a greeting
+	// Broker
 	WorkerRegister(context.Context, *RegisterRequest) (*RegisterResponse, error)
+	TaskResult(context.Context, *TaskResultRequest) (*TaskResultResponse, error)
+	// Worker
 	SendTask(context.Context, *TaskRequest) (*TaskResponse, error)
 	mustEmbedUnimplementedGreeterServer()
 }
@@ -65,6 +78,9 @@ type UnimplementedGreeterServer struct {
 
 func (UnimplementedGreeterServer) WorkerRegister(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WorkerRegister not implemented")
+}
+func (UnimplementedGreeterServer) TaskResult(context.Context, *TaskResultRequest) (*TaskResultResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TaskResult not implemented")
 }
 func (UnimplementedGreeterServer) SendTask(context.Context, *TaskRequest) (*TaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendTask not implemented")
@@ -100,6 +116,24 @@ func _Greeter_WorkerRegister_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Greeter_TaskResult_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TaskResultRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreeterServer).TaskResult(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Greeter/TaskResult",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreeterServer).TaskResult(ctx, req.(*TaskResultRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Greeter_SendTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TaskRequest)
 	if err := dec(in); err != nil {
@@ -128,6 +162,10 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "WorkerRegister",
 			Handler:    _Greeter_WorkerRegister_Handler,
+		},
+		{
+			MethodName: "TaskResult",
+			Handler:    _Greeter_TaskResult_Handler,
 		},
 		{
 			MethodName: "SendTask",

@@ -14,7 +14,7 @@ import (
 
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/model"
-	msg "github.com/sunzhongshan1988/army-ant/broker/message"
+	grpc "github.com/sunzhongshan1988/army-ant/broker/grpc"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
@@ -54,7 +54,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		},
 	}
 
-	msg.SendTask(request)
+	grpc.SendTask(request)
 
 	answer := &model.Task{
 		Status: 0,
