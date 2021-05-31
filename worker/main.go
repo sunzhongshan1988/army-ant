@@ -21,9 +21,9 @@ package main
 
 import (
 	"github.com/sunzhongshan1988/army-ant/worker/config"
-	"log"
-
+	"github.com/sunzhongshan1988/army-ant/worker/grpc"
 	svr "github.com/sunzhongshan1988/army-ant/worker/server"
+	"log"
 )
 
 func main() {
@@ -31,7 +31,8 @@ func main() {
 
 	config.Init()
 
-	//grpc.Register()
+	grpc.Register()
 
 	svr.Grpc()
+
 }

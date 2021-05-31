@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
+	"strconv"
 	"time"
 
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
@@ -33,7 +34,7 @@ func Register() {
 	request := &pb.RegisterRequest{
 		Auth:       "#shdk687dHHhiJHDHDHH",
 		WorkerType: pb.WorkerType_IDC,
-		WorkerLink: config.GetWorkerId() + ":" + string(config.GetPort()),
+		WorkerLink: config.GetAddress() + ":" + strconv.Itoa(int(config.GetPort())),
 		Content:    "",
 		CreateAt:   ptypes.TimestampNow(),
 	}
@@ -49,9 +50,13 @@ func Register() {
 	jsonStr, _ := m.MarshalToString(r)
 	log.Printf("Broker Response: %s", jsonStr)
 
+	config.SetBrokerId(r.BrokerId)
+	config.SetWorkerId(r.WorkerId)
+	config.SetBrokerLink(r.BrokerLink)
+
 }
 
-func ResultTask(result string, status int32, start *timestamppb.Timestamp, end *timestamppb.Timestamp) {
+func TaskResult(result string, status int32, start *timestamppb.Timestamp, end *timestamppb.Timestamp) {
 	// Set up a connection to the broker.
 	conn, err1 := grpc.Dial(brokerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {

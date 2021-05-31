@@ -34,6 +34,16 @@ func GetWorkerType() string {
 func GetBrokerId() string {
 	return worker.brokerId
 }
+func SetBrokerId(id string) {
+	worker.brokerId = id
+}
+
+func GetBrokerLink() string {
+	return worker.brokerLink
+}
+func SetBrokerLink(link string) {
+	worker.brokerLink = link
+}
 
 func GetAddress() string {
 	return worker.address

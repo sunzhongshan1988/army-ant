@@ -1,6 +1,8 @@
 package performer
 
 import (
+	"github.com/golang/protobuf/ptypes"
+	"github.com/sunzhongshan1988/army-ant/worker/grpc"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,13 +17,14 @@ type Input struct {
 
 func Standard(input Input) {
 	var out string
+	startAt := ptypes.TimestampNow()
 
 	cmd := exec.Command(input.App, input.Args...)
 	cmd.Env = append(os.Environ(), input.Env...)
 
 	stdout, errSo := cmd.StdoutPipe()
 	if errSo != nil {
-		log.Fatal(errSo)
+		log.Printf("%s", errSo)
 	}
 
 	stderr, errSe := cmd.StderrPipe()
@@ -44,4 +47,6 @@ func Standard(input Input) {
 	}
 
 	log.Printf("command out: %v", out)
+
+	grpc.TaskResult(out, 1, startAt, ptypes.TimestampNow())
 }

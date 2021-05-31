@@ -14,7 +14,7 @@ import (
 
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/model"
-	grpc "github.com/sunzhongshan1988/army-ant/broker/grpc"
+	"github.com/sunzhongshan1988/army-ant/broker/grpc"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
