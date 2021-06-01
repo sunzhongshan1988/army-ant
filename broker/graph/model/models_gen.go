@@ -24,4 +24,5 @@ type TaskInput struct {
 	WorkerID string `json:"worker_id"`
 	Type     string `json:"type"`
 	Dna      string `json:"dna"`
+	Mutation string `json:"mutation"`
 }

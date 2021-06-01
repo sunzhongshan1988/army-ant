@@ -273,6 +273,7 @@ input TaskInput {
   worker_id: String!
   type: String!
   dna: String!
+  mutation: String!
 }
 type Task {
   status: Int!
@@ -1945,6 +1946,14 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dna"))
 			it.Dna, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "mutation":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mutation"))
+			it.Mutation, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
