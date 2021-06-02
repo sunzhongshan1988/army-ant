@@ -41,7 +41,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		log.Printf("[error]DNA: %v", err)
 	}
 
-	mDec, _ := b64.StdEncoding.DecodeString(task.Dna)
+	mDec, _ := b64.StdEncoding.DecodeString(task.Mutation)
 	var mtt model.Mutation
 	err1 := json.Unmarshal([]byte(mDec), &mtt)
 	if err1 != nil {
@@ -54,10 +54,10 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		Dna: &pb.DNA{
 			Cmd: &pb.Command{
 				App:  m.Cmd.App,
-				Args: m.Cmd.Args,
-				Env:  m.Cmd.Env,
+				Args: mtt.Cmd.Args,
+				Env:  mtt.Cmd.Env,
 			},
-			Version: m.Version,
+			Version: mtt.Version,
 		},
 	}
 
