@@ -14,7 +14,7 @@ type workerService interface {
 	/*
 	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
 	 */
-	FindById(filter bson.M) (*model.WorkerRegister, error)
+	FindOne(filter bson.M) (*model.WorkerRegister, error)
 }
 
 type WorkerService struct {
@@ -25,7 +25,7 @@ func (s *WorkerService) InsertOne(worker *model.WorkerRegister) (*mongo.InsertOn
 	return workerRepo.InsertOne(context.TODO(), worker)
 }
 
-func (s *WorkerService) FindById(filter bson.M) (*model.WorkerRegister, error) {
+func (s *WorkerService) FindOne(filter bson.M) (*model.WorkerRegister, error) {
 	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
-	return workerRepo.FindById(context.TODO(), filter)
+	return workerRepo.FindOne(context.TODO(), filter)
 }

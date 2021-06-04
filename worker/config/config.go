@@ -6,7 +6,8 @@ type Worker struct {
 	brokerId   string
 	brokerLink string
 	address    string
-	port       int32
+	port       string
+	label      string
 }
 
 var worker = &Worker{}
@@ -17,7 +18,8 @@ func Init() {
 	worker.brokerId = ""
 	worker.brokerLink = "localhost:50051"
 	worker.address = "127.0.0.1"
-	worker.port = 50052
+	worker.port = "50052"
+	worker.label = "worker01"
 }
 
 func GetWorkerId() string {
@@ -49,6 +51,14 @@ func GetAddress() string {
 	return worker.address
 }
 
-func GetPort() int32 {
+func GetPort() string {
 	return worker.port
+}
+
+func GetWorkerLink() string {
+	return worker.address + ":" + worker.port
+}
+
+func GetLabel() string {
+	return worker.label
 }

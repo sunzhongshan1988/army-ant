@@ -5,17 +5,15 @@ import (
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
+	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/service"
+	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
-)
-
-const (
-	serverPort = ":50051"
 )
 
 // server is used to implement server.GreeterServer.
@@ -27,7 +25,7 @@ func Grpc() {
 	// Start server
 	log.Printf("--Start Grpc Server")
 
-	lis, err := net.Listen("tcp", serverPort)
+	lis, err := net.Listen("tcp", ":"+config.GetGrpcPort())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -50,20 +48,29 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	jsonStr, _ := m.MarshalToString(in)
 	log.Printf("Worker Register: %v", jsonStr)
 
-	brokerId := uuid.New().String()
-	workerId := uuid.New().String()
-
 	worker := &model.WorkerRegister{
-		BrokerId:   brokerId,
-		BrokerLink: "192.168.12.233:8088",
-		WorkerId:   workerId,
-		WorkerLink: in.WorkerLink,
-		CreateAt:   in.CreateAt,
-		UpdateAt:   ptypes.TimestampNow(),
+		BrokerId:    "",
+		BrokerLink:  config.GetGrpcLink(),
+		WorkerId:    "",
+		WorkerLink:  in.WorkerLink,
+		WorkerLabel: in.WorkerLabel,
+		CreateAt:    in.CreateAt,
+		UpdateAt:    ptypes.TimestampNow(),
 	}
 
-	// Save to
-	_, _ = workerService.InsertOne(worker)
+	// Query Database
+	filter := bson.M{"worker_link": in.WorkerLink, "worker_label": in.WorkerLabel}
+	r, _ := workerService.FindOne(filter)
+	if r != nil {
+		worker.BrokerId = r.BrokerId
+		worker.WorkerId = r.WorkerId
+	} else {
+		worker.BrokerId = uuid.New().String()
+		worker.WorkerId = uuid.New().String()
+
+		// Save worker's information to DB
+		_, _ = workerService.InsertOne(worker)
+	}
 
 	res := &pb.RegisterResponse{
 		BrokerId:   worker.BrokerId,

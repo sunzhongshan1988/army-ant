@@ -3,16 +3,13 @@ package server
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/sunzhongshan1988/army-ant/worker/config"
 	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
 	"google.golang.org/grpc"
 	"log"
 	"net"
 
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
-)
-
-const (
-	serverPort = ":50052"
 )
 
 // server is used to implement server.GreeterServer.
@@ -23,7 +20,7 @@ type server struct {
 func Grpc() {
 	// Start server
 	log.Printf("--Start Server")
-	lis, err := net.Listen("tcp", serverPort)
+	lis, err := net.Listen("tcp", ":"+config.GetPort())
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

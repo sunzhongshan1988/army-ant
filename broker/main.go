@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
 	svr "github.com/sunzhongshan1988/army-ant/broker/server"
 	"log"
@@ -10,6 +11,9 @@ import (
 
 func main() {
 	log.Printf("------------Broker Started!------------")
+
+	// Initialized config
+	config.Init()
 
 	// Initialized mongo database
 	mongodb.Init()
