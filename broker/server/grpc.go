@@ -65,7 +65,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		worker.BrokerId = r.BrokerId
 		worker.WorkerId = r.WorkerId
 	} else {
-		worker.BrokerId = uuid.New().String()
+		worker.BrokerId = config.GetBrokerId()
 		worker.WorkerId = uuid.New().String()
 
 		// Save worker's information to DB

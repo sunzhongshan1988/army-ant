@@ -12,13 +12,13 @@ import (
 func main() {
 	log.Printf("------------Broker Started!------------")
 
-	// Initialized config
-	config.Init()
-
 	// Initialized mongo database
 	mongodb.Init()
 	client := mongodb.Client
 	defer client.Disconnect(context.Background())
+
+	// Initialized config
+	config.Init()
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)

@@ -1,5 +1,13 @@
 package config
 
+import (
+	"github.com/golang/protobuf/ptypes"
+	"github.com/google/uuid"
+	"github.com/sunzhongshan1988/army-ant/broker/model"
+	"github.com/sunzhongshan1988/army-ant/broker/service"
+	"go.mongodb.org/mongo-driver/bson"
+)
+
 type Broker struct {
 	label       string
 	brokerId    string
@@ -18,6 +26,8 @@ func Init() {
 	broker.address = "127.0.0.1"
 	broker.grpcPort = "50051"
 	broker.graphqlPort = "8080"
+
+	registerBroker()
 }
 
 func GetBrokerLabel() string {
@@ -52,4 +62,26 @@ func GetGrpcLink() string {
 
 func GetGraphQLPort() string {
 	return broker.graphqlPort
+}
+
+func registerBroker() {
+	var brokerService = service.BrokerService{}
+	broker := &model.BrokerRegister{
+		BrokerId:    GetBrokerId(),
+		BrokerLink:  GetGrpcLink(),
+		BrokerLabel: GetBrokerLabel(),
+		CreateAt:    ptypes.TimestampNow(),
+		UpdateAt:    ptypes.TimestampNow(),
+	}
+
+	// Query Database
+	filter := bson.M{"broker_link": GetGrpcLink(), "broker_label": GetBrokerLabel()}
+	r, _ := brokerService.FindOne(filter)
+	if r != nil {
+		SetBrokerId(r.BrokerId)
+	} else {
+		SetBrokerId(uuid.New().String())
+		// Save worker's information to DB
+		_, _ = brokerService.InsertOne(broker)
+	}
 }
