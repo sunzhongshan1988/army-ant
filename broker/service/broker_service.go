@@ -15,7 +15,7 @@ type brokerService interface {
 	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
 	 */
 	FindOne(filter bson.M) (*model.BrokerRegister, error)
-	FindAll(filter bson.M, page *model.PageableRequest) (*model.PageableResponse, error)
+	FindAll(filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error)
 }
 
 type BrokerService struct {
@@ -31,7 +31,7 @@ func (s *BrokerService) FindOne(filter bson.M) (*model.BrokerRegister, error) {
 	return brokerRepo.FindOne(context.TODO(), filter)
 }
 
-func (s *BrokerService) FindAll(filter bson.M, page *model.PageableRequest) (*model.PageableResponse, error) {
+func (s *BrokerService) FindAll(filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error) {
 	var brokerRepo = repository.BrokerRepository{Client: mongodb.Client}
 	return brokerRepo.FindAll(context.TODO(), filter, page)
 }

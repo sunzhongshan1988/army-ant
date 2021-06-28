@@ -12,12 +12,18 @@ schema {
 type Query {
   characters: [Character!]!
   search(name: String!): Character
-}
+  get_broker_items(page: GetBrokerItemsInput): BrokerItems
+ }
 
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
   receive_task(task: TaskInput): Task!
+}
+
+type Timestamppb {
+  seconds: Int
+  nanos: Int
 }
 
 # just a input type for our mutation
@@ -45,4 +51,24 @@ input TaskInput {
 type Task {
   status: Int!
   msg: String!
+}
+
+# Get broker items
+input GetBrokerItemsInput {
+  index: Int!
+  size: Int!
+ }
+type BrokerItems {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  items: [Broker]
+}
+type Broker {
+  _id: String!
+  broker_id: String!
+  broker_link: String!
+  broker_label: String!
+  create_at: Timestamppb
+  update_at: Timestamppb
 }

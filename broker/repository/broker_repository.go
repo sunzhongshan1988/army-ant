@@ -13,16 +13,16 @@ import (
 type brokerRepository interface {
 	InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.BrokerRegister, error)
-	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.PageableResponse, error)
+	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error)
 }
 
 type BrokerRepository struct {
 	Client *mongo.Client
 }
 
-func (r *BrokerRepository) InsertOne(ctx context.Context, worker *model.BrokerRegister) (*mongo.InsertOneResult, error) {
+func (r *BrokerRepository) InsertOne(ctx context.Context, broker *model.BrokerRegister) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Client.Database("armyant").Collection("broker").InsertOne(ctx, worker)
+	insertResult, err := r.Client.Database("armyant").Collection("broker").InsertOne(ctx, broker)
 	if err != nil {
 		log.Printf("[error,db]%v", err)
 	}
@@ -48,9 +48,9 @@ func (r *BrokerRepository) FindOne(ctx context.Context, filter bson.M) (*model.B
 	return &result, nil
 }
 
-func (r *BrokerRepository) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.PageableResponse, error) {
+func (r *BrokerRepository) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error) {
 
-	result := model.PageableResponse{}
+	result := model.BrokerPageResponse{}
 
 	findOptions := &options.FindOptions{}
 	if page.Size > 0 {

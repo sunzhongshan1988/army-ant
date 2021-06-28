@@ -2,6 +2,22 @@
 
 package model
 
+type Broker struct {
+	ID          string       `json:"_id"`
+	BrokerID    string       `json:"broker_id"`
+	BrokerLink  string       `json:"broker_link"`
+	BrokerLabel string       `json:"broker_label"`
+	CreateAt    *Timestamppb `json:"create_at"`
+	UpdateAt    *Timestamppb `json:"update_at"`
+}
+
+type BrokerItems struct {
+	TotalItems  int64     `json:"totalItems"`
+	TotalPages  int64     `json:"totalPages"`
+	CurrentPage int64     `json:"currentPage"`
+	Items       []*Broker `json:"items"`
+}
+
 type Character struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
@@ -11,6 +27,11 @@ type Character struct {
 type CharacterInput struct {
 	Name  string `json:"name"`
 	Likes int    `json:"likes"`
+}
+
+type GetBrokerItemsInput struct {
+	Index int `json:"index"`
+	Size  int `json:"size"`
 }
 
 type Task struct {
@@ -25,4 +46,9 @@ type TaskInput struct {
 	Type     string `json:"type"`
 	Dna      string `json:"dna"`
 	Mutation string `json:"mutation"`
+}
+
+type Timestamppb struct {
+	Seconds *int `json:"seconds"`
+	Nanos   *int `json:"nanos"`
 }
