@@ -13,9 +13,8 @@ import (
 	"strings"
 
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
-	"github.com/sunzhongshan1988/army-ant/broker/graph/model"
 	"github.com/sunzhongshan1988/army-ant/broker/grpc"
-	bm "github.com/sunzhongshan1988/army-ant/broker/model"
+	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
@@ -66,13 +65,13 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	grpc.SendTask(request)
 
-	answer := &model.Task{
+	res := &model.Task{
 		Status: 0,
 		Msg:    "ok",
 	}
 
-	r.tasks = append(r.tasks, answer)
-	return answer, nil
+	r.tasks = append(r.tasks, res)
+	return res, nil
 }
 
 func (r *queryResolver) Characters(ctx context.Context) ([]*model.Character, error) {
@@ -89,24 +88,17 @@ func (r *queryResolver) Search(ctx context.Context, name string) (*model.Charact
 	return nil, nil
 }
 
-func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerItems, error) {
+func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerItemsPage, error) {
 	brokerService := service.BrokerService{}
 
-	pg := &bm.PageableRequest{
+	pg := &model.PageableRequest{
 		Index: int64(page.Index),
 		Size:  int64(page.Size),
 	}
-	dbRes, _ := brokerService.FindAll(bson.M{}, pg)
+	_, _ = brokerService.FindAll(bson.M{}, pg)
 	log.Printf("[mongo]info: %v", "find all broker ok!")
 
-	res := &model.BrokerItems{
-		TotalItems:  dbRes.TotalItems,
-		TotalPages:  dbRes.TotalPages,
-		CurrentPage: dbRes.CurrentPage,
-		Items:       dbRes.Items,
-	}
-
-	return res, nil
+	return nil, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

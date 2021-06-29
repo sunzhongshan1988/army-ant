@@ -12,7 +12,7 @@ schema {
 type Query {
   characters: [Character!]!
   search(name: String!): Character
-  get_broker_items(page: GetBrokerItemsInput): BrokerItems
+  get_broker_items(page: GetBrokerItemsInput): BrokerItemsPage
  }
 
 # This is a mutation we will be doing
@@ -58,17 +58,11 @@ input GetBrokerItemsInput {
   index: Int!
   size: Int!
  }
-type BrokerItems {
+type BrokerItemsPage {
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
-  items: [Broker]
+  items: [BrokerRegister]
 }
-type Broker {
-  _id: String!
-  broker_id: String!
-  broker_link: String!
-  broker_label: String!
-  create_at: Timestamppb
-  update_at: Timestamppb
-}
+
+scalar BrokerRegister

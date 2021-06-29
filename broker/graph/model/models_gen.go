@@ -12,9 +12,9 @@ type Broker struct {
 }
 
 type BrokerItems struct {
-	TotalItems  int64     `json:"totalItems"`
-	TotalPages  int64     `json:"totalPages"`
-	CurrentPage int64     `json:"currentPage"`
+	TotalItems  int       `json:"totalItems"`
+	TotalPages  int       `json:"totalPages"`
+	CurrentPage int       `json:"currentPage"`
 	Items       []*Broker `json:"items"`
 }
 
