@@ -54,3 +54,5 @@ models:
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int32
+  BrokerScalar:
+    model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.BrokerScalar

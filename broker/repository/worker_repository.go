@@ -9,7 +9,7 @@ import (
 )
 
 type workerRepository interface {
-	InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
+	InsertOne(ctx context.Context, worker *model.Worker) (*mongo.InsertOneResult, error)
 	FindOne(ctx context.Context, filter bson.M)
 }
 
@@ -17,21 +17,21 @@ type WorkerRepository struct {
 	Client *mongo.Client
 }
 
-func (r *WorkerRepository) InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
+func (r *WorkerRepository) InsertOne(ctx context.Context, worker *model.Worker) (*mongo.InsertOneResult, error) {
 
 	insertResult, err := r.Client.Database("armyant").Collection("worker").InsertOne(ctx, worker)
 	if err != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb,error]: %v", err)
 	}
 
-	log.Printf("MongoDB Save: %v", insertResult.InsertedID)
+	log.Printf("[mongodb,save]: %v", insertResult.InsertedID)
 
 	return insertResult, nil
 }
 
-func (r *WorkerRepository) FindOne(ctx context.Context, filter bson.M) (*model.WorkerRegister, error) {
+func (r *WorkerRepository) FindOne(ctx context.Context, filter bson.M) (*model.Worker, error) {
 
-	var result model.WorkerRegister
+	var result model.Worker
 
 	err := r.Client.Database("armyant").Collection("worker").FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {

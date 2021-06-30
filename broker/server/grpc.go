@@ -48,7 +48,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	jsonStr, _ := m.MarshalToString(in)
 	log.Printf("Worker Register: %v", jsonStr)
 
-	worker := &model.WorkerRegister{
+	worker := &model.Worker{
 		BrokerId:    "",
 		BrokerLink:  config.GetGrpcLink(),
 		WorkerId:    "",

@@ -75,7 +75,7 @@ func registerBroker() {
 	} else {
 		SetBrokerId(uuid.New().String())
 		// Save worker's information to DB
-		broker := &model.BrokerRegister{
+		broker := &model.Broker{
 			BrokerId:    GetBrokerId(),
 			BrokerLink:  GetGrpcLink(),
 			BrokerLabel: GetBrokerLabel(),

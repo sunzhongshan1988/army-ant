@@ -88,17 +88,23 @@ func (r *queryResolver) Search(ctx context.Context, name string) (*model.Charact
 	return nil, nil
 }
 
-func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerItemsPage, error) {
+func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error) {
 	brokerService := service.BrokerService{}
 
 	pg := &model.PageableRequest{
 		Index: int64(page.Index),
 		Size:  int64(page.Size),
 	}
-	_, _ = brokerService.FindAll(bson.M{}, pg)
+	dbRes, _ := brokerService.FindAll(bson.M{}, pg)
 	log.Printf("[mongo]info: %v", "find all broker ok!")
 
-	return nil, nil
+	res := &model.BrokerPageResponse{
+		TotalPages:  dbRes.TotalPages,
+		TotalItems:  dbRes.TotalItems,
+		CurrentPage: dbRes.CurrentPage,
+		Items:       dbRes.Items,
+	}
+	return res, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

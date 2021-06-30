@@ -10,22 +10,22 @@ import (
 )
 
 type workerService interface {
-	InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
+	InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error)
 	/*
 	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
 	 */
-	FindOne(filter bson.M) (*model.WorkerRegister, error)
+	FindOne(filter bson.M) (*model.Worker, error)
 }
 
 type WorkerService struct {
 }
 
-func (s *WorkerService) InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
+func (s *WorkerService) InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error) {
 	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
 	return workerRepo.InsertOne(context.TODO(), worker)
 }
 
-func (s *WorkerService) FindOne(filter bson.M) (*model.WorkerRegister, error) {
+func (s *WorkerService) FindOne(filter bson.M) (*model.Worker, error) {
 	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
 	return workerRepo.FindOne(context.TODO(), filter)
 }

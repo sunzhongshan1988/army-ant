@@ -10,17 +10,17 @@ import (
 	"math"
 )
 
-type brokerRepository interface {
-	InsertOne(ctx context.Context, worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
-	FindOne(ctx context.Context, filter bson.M) (*model.BrokerRegister, error)
-	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error)
+type BrokerRepository interface {
+	InsertOne(ctx context.Context, worker *model.Broker) (*mongo.InsertOneResult, error)
+	FindOne(ctx context.Context, filter bson.M) (*model.Broker, error)
+	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerItemsPage, error)
 }
 
-type BrokerRepository struct {
+type BrokerMongo struct {
 	Client *mongo.Client
 }
 
-func (r *BrokerRepository) InsertOne(ctx context.Context, broker *model.BrokerRegister) (*mongo.InsertOneResult, error) {
+func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mongo.InsertOneResult, error) {
 
 	insertResult, err := r.Client.Database("armyant").Collection("broker").InsertOne(ctx, broker)
 	if err != nil {
@@ -32,9 +32,9 @@ func (r *BrokerRepository) InsertOne(ctx context.Context, broker *model.BrokerRe
 	return insertResult, nil
 }
 
-func (r *BrokerRepository) FindOne(ctx context.Context, filter bson.M) (*model.BrokerRegister, error) {
+func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker, error) {
 
-	var result model.BrokerRegister
+	var result model.Broker
 
 	err := r.Client.Database("armyant").Collection("broker").FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {
@@ -48,9 +48,9 @@ func (r *BrokerRepository) FindOne(ctx context.Context, filter bson.M) (*model.B
 	return &result, nil
 }
 
-func (r *BrokerRepository) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerPageResponse, error) {
+func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerItemsPage, error) {
 
-	result := model.BrokerPageResponse{}
+	result := model.BrokerItemsPage{}
 
 	findOptions := &options.FindOptions{}
 	if page.Size > 0 {
