@@ -12,18 +12,14 @@ schema {
 type Query {
   characters: [Character!]!
   search(name: String!): Character
-  get_broker_items(page: GetBrokerItemsInput): BrokerItemsPage
+  getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
+  getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
  }
 
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
   receive_task(task: TaskInput): Task!
-}
-
-type Timestamppb {
-  seconds: Int
-  nanos: Int
 }
 
 # just a input type for our mutation
@@ -58,11 +54,25 @@ input GetBrokerItemsInput {
   index: Int!
   size: Int!
  }
-type BrokerItemsPage {
+type BrokerPageResponse {
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
-  items: [BrokerRegister]
+  items: [BrokerScalar]
 }
 
-scalar BrokerRegister
+# Get worker items
+input GetWorkerItemsInput {
+  index: Int!
+  size: Int!
+}
+type WorkerPageResponse {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  items: [WorkerScalar]
+}
+
+
+scalar BrokerScalar
+scalar WorkerScalar

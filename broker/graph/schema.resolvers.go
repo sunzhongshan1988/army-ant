@@ -88,17 +88,40 @@ func (r *queryResolver) Search(ctx context.Context, name string) (*model.Charact
 	return nil, nil
 }
 
-func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerItemsPage, error) {
-	brokerService := service.BrokerService{}
+func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error) {
+	brokerService := service.Broker{}
 
 	pg := &model.PageableRequest{
-		Index: int64(page.Index),
-		Size:  int64(page.Size),
+		Index: page.Index,
+		Size:  page.Size,
 	}
-	_, _ = brokerService.FindAll(bson.M{}, pg)
-	log.Printf("[mongo]info: %v", "find all broker ok!")
+	dbRes, _ := brokerService.FindAll(bson.M{}, pg)
 
-	return nil, nil
+	res := &model.BrokerPageResponse{
+		TotalPages:  dbRes.TotalPages,
+		TotalItems:  dbRes.TotalItems,
+		CurrentPage: dbRes.CurrentPage,
+		Items:       dbRes.Items,
+	}
+	return res, nil
+}
+
+func (r *queryResolver) GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error) {
+	workerService := service.Worker{}
+
+	pg := &model.PageableRequest{
+		Index: page.Index,
+		Size:  page.Size,
+	}
+	dbRes, _ := workerService.FindAll(bson.M{}, pg)
+
+	res := &model.WorkerPageResponse{
+		TotalPages:  dbRes.TotalPages,
+		TotalItems:  dbRes.TotalItems,
+		CurrentPage: dbRes.CurrentPage,
+		Items:       dbRes.Items,
+	}
+	return res, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

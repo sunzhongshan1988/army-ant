@@ -9,23 +9,28 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type workerService interface {
-	InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error)
+type WorkerService interface {
+	InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error)
 	/*
 	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
 	 */
-	FindOne(filter bson.M) (*model.WorkerRegister, error)
+	FindOne(filter bson.M) (*model.Worker, error)
 }
 
-type WorkerService struct {
+type Worker struct {
 }
 
-func (s *WorkerService) InsertOne(worker *model.WorkerRegister) (*mongo.InsertOneResult, error) {
-	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
+func (s *Worker) InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error) {
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mongodb.Client}
 	return workerRepo.InsertOne(context.TODO(), worker)
 }
 
-func (s *WorkerService) FindOne(filter bson.M) (*model.WorkerRegister, error) {
-	var workerRepo = repository.WorkerRepository{Client: mongodb.Client}
+func (s *Worker) FindOne(filter bson.M) (*model.Worker, error) {
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mongodb.Client}
 	return workerRepo.FindOne(context.TODO(), filter)
+}
+
+func (s *Worker) FindAll(filter bson.M, page *model.PageableRequest) (*model.WorkerItemsPage, error) {
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mongodb.Client}
+	return workerRepo.FindAll(context.TODO(), filter, page)
 }

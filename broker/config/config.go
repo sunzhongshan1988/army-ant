@@ -65,7 +65,7 @@ func GetGraphQLPort() string {
 }
 
 func registerBroker() {
-	var brokerService = service.BrokerService{}
+	brokerService := service.Broker{}
 
 	// Query Database
 	filter := bson.M{"broker_link": GetGrpcLink(), "broker_label": GetBrokerLabel()}
@@ -75,7 +75,7 @@ func registerBroker() {
 	} else {
 		SetBrokerId(uuid.New().String())
 		// Save worker's information to DB
-		broker := &model.BrokerRegister{
+		broker := &model.Broker{
 			BrokerId:    GetBrokerId(),
 			BrokerLink:  GetGrpcLink(),
 			BrokerLabel: GetBrokerLabel(),

@@ -39,7 +39,7 @@ func Grpc() {
 // WorkerRegister implements WorkerRegister.GreeterServer
 func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 
-	var workerService = service.WorkerService{}
+	workerService := service.Worker{}
 
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -48,7 +48,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	jsonStr, _ := m.MarshalToString(in)
 	log.Printf("Worker Register: %v", jsonStr)
 
-	worker := &model.WorkerRegister{
+	worker := &model.Worker{
 		BrokerId:    "",
 		BrokerLink:  config.GetGrpcLink(),
 		WorkerId:    "",

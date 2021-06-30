@@ -12,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/sunzhongshan1988/army-ant/broker/graph/scalar"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -43,7 +44,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	BrokerItemsPage struct {
+	BrokerPageResponse struct {
 		CurrentPage func(childComplexity int) int
 		Items       func(childComplexity int) int
 		TotalItems  func(childComplexity int) int
@@ -64,6 +65,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Characters     func(childComplexity int) int
 		GetBrokerItems func(childComplexity int, page *model.GetBrokerItemsInput) int
+		GetWorkerItems func(childComplexity int, page *model.GetWorkerItemsInput) int
 		Search         func(childComplexity int, name string) int
 	}
 
@@ -72,9 +74,11 @@ type ComplexityRoot struct {
 		Status func(childComplexity int) int
 	}
 
-	Timestamppb struct {
-		Nanos   func(childComplexity int) int
-		Seconds func(childComplexity int) int
+	WorkerPageResponse struct {
+		CurrentPage func(childComplexity int) int
+		Items       func(childComplexity int) int
+		TotalItems  func(childComplexity int) int
+		TotalPages  func(childComplexity int) int
 	}
 }
 
@@ -85,7 +89,8 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Characters(ctx context.Context) ([]*model.Character, error)
 	Search(ctx context.Context, name string) (*model.Character, error)
-	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerItemsPage, error)
+	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error)
+	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 }
 
 type executableSchema struct {
@@ -103,33 +108,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "BrokerItemsPage.currentPage":
-		if e.complexity.BrokerItemsPage.CurrentPage == nil {
+	case "BrokerPageResponse.currentPage":
+		if e.complexity.BrokerPageResponse.CurrentPage == nil {
 			break
 		}
 
-		return e.complexity.BrokerItemsPage.CurrentPage(childComplexity), true
+		return e.complexity.BrokerPageResponse.CurrentPage(childComplexity), true
 
-	case "BrokerItemsPage.items":
-		if e.complexity.BrokerItemsPage.Items == nil {
+	case "BrokerPageResponse.items":
+		if e.complexity.BrokerPageResponse.Items == nil {
 			break
 		}
 
-		return e.complexity.BrokerItemsPage.Items(childComplexity), true
+		return e.complexity.BrokerPageResponse.Items(childComplexity), true
 
-	case "BrokerItemsPage.totalItems":
-		if e.complexity.BrokerItemsPage.TotalItems == nil {
+	case "BrokerPageResponse.totalItems":
+		if e.complexity.BrokerPageResponse.TotalItems == nil {
 			break
 		}
 
-		return e.complexity.BrokerItemsPage.TotalItems(childComplexity), true
+		return e.complexity.BrokerPageResponse.TotalItems(childComplexity), true
 
-	case "BrokerItemsPage.totalPages":
-		if e.complexity.BrokerItemsPage.TotalPages == nil {
+	case "BrokerPageResponse.totalPages":
+		if e.complexity.BrokerPageResponse.TotalPages == nil {
 			break
 		}
 
-		return e.complexity.BrokerItemsPage.TotalPages(childComplexity), true
+		return e.complexity.BrokerPageResponse.TotalPages(childComplexity), true
 
 	case "Character.id":
 		if e.complexity.Character.ID == nil {
@@ -183,17 +188,29 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Characters(childComplexity), true
 
-	case "Query.get_broker_items":
+	case "Query.getBrokerItems":
 		if e.complexity.Query.GetBrokerItems == nil {
 			break
 		}
 
-		args, err := ec.field_Query_get_broker_items_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_getBrokerItems_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
 		return e.complexity.Query.GetBrokerItems(childComplexity, args["page"].(*model.GetBrokerItemsInput)), true
+
+	case "Query.getWorkerItems":
+		if e.complexity.Query.GetWorkerItems == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getWorkerItems_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetWorkerItems(childComplexity, args["page"].(*model.GetWorkerItemsInput)), true
 
 	case "Query.search":
 		if e.complexity.Query.Search == nil {
@@ -221,19 +238,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Task.Status(childComplexity), true
 
-	case "Timestamppb.nanos":
-		if e.complexity.Timestamppb.Nanos == nil {
+	case "WorkerPageResponse.currentPage":
+		if e.complexity.WorkerPageResponse.CurrentPage == nil {
 			break
 		}
 
-		return e.complexity.Timestamppb.Nanos(childComplexity), true
+		return e.complexity.WorkerPageResponse.CurrentPage(childComplexity), true
 
-	case "Timestamppb.seconds":
-		if e.complexity.Timestamppb.Seconds == nil {
+	case "WorkerPageResponse.items":
+		if e.complexity.WorkerPageResponse.Items == nil {
 			break
 		}
 
-		return e.complexity.Timestamppb.Seconds(childComplexity), true
+		return e.complexity.WorkerPageResponse.Items(childComplexity), true
+
+	case "WorkerPageResponse.totalItems":
+		if e.complexity.WorkerPageResponse.TotalItems == nil {
+			break
+		}
+
+		return e.complexity.WorkerPageResponse.TotalItems(childComplexity), true
+
+	case "WorkerPageResponse.totalPages":
+		if e.complexity.WorkerPageResponse.TotalPages == nil {
+			break
+		}
+
+		return e.complexity.WorkerPageResponse.TotalPages(childComplexity), true
 
 	}
 	return 0, false
@@ -313,18 +344,14 @@ schema {
 type Query {
   characters: [Character!]!
   search(name: String!): Character
-  get_broker_items(page: GetBrokerItemsInput): BrokerItemsPage
+  getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
+  getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
  }
 
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
   receive_task(task: TaskInput): Task!
-}
-
-type Timestamppb {
-  seconds: Int
-  nanos: Int
 }
 
 # just a input type for our mutation
@@ -359,14 +386,28 @@ input GetBrokerItemsInput {
   index: Int!
   size: Int!
  }
-type BrokerItemsPage {
+type BrokerPageResponse {
   totalItems: Int!
   totalPages: Int!
   currentPage: Int!
-  items: [BrokerRegister]
+  items: [BrokerScalar]
 }
 
-scalar BrokerRegister`, BuiltIn: false},
+# Get worker items
+input GetWorkerItemsInput {
+  index: Int!
+  size: Int!
+}
+type WorkerPageResponse {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  items: [WorkerScalar]
+}
+
+
+scalar BrokerScalar
+scalar WorkerScalar`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -419,13 +460,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_get_broker_items_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_getBrokerItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.GetBrokerItemsInput
 	if tmp, ok := rawArgs["page"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
 		arg0, err = ec.unmarshalOGetBrokerItemsInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetBrokerItemsInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["page"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getWorkerItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.GetWorkerItemsInput
+	if tmp, ok := rawArgs["page"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+		arg0, err = ec.unmarshalOGetWorkerItemsInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetWorkerItemsInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -487,7 +543,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _BrokerItemsPage_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.BrokerItemsPage) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -495,7 +551,7 @@ func (ec *executionContext) _BrokerItemsPage_totalItems(ctx context.Context, fie
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "BrokerItemsPage",
+		Object:     "BrokerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -522,7 +578,7 @@ func (ec *executionContext) _BrokerItemsPage_totalItems(ctx context.Context, fie
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BrokerItemsPage_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.BrokerItemsPage) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -530,7 +586,7 @@ func (ec *executionContext) _BrokerItemsPage_totalPages(ctx context.Context, fie
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "BrokerItemsPage",
+		Object:     "BrokerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -557,7 +613,7 @@ func (ec *executionContext) _BrokerItemsPage_totalPages(ctx context.Context, fie
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BrokerItemsPage_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.BrokerItemsPage) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -565,7 +621,7 @@ func (ec *executionContext) _BrokerItemsPage_currentPage(ctx context.Context, fi
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "BrokerItemsPage",
+		Object:     "BrokerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -592,7 +648,7 @@ func (ec *executionContext) _BrokerItemsPage_currentPage(ctx context.Context, fi
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BrokerItemsPage_items(ctx context.Context, field graphql.CollectedField, obj *model.BrokerItemsPage) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_items(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -600,7 +656,7 @@ func (ec *executionContext) _BrokerItemsPage_items(ctx context.Context, field gr
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "BrokerItemsPage",
+		Object:     "BrokerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -619,9 +675,9 @@ func (ec *executionContext) _BrokerItemsPage_items(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.BrokerRegister)
+	res := resTmp.([]*model.Broker)
 	fc.Result = res
-	return ec.marshalOBrokerRegister2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx, field.Selections, res)
+	return ec.marshalOBrokerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Character_id(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
@@ -887,7 +943,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	return ec.marshalOCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_get_broker_items(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getBrokerItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -904,7 +960,7 @@ func (ec *executionContext) _Query_get_broker_items(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_get_broker_items_args(ctx, rawArgs)
+	args, err := ec.field_Query_getBrokerItems_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -921,9 +977,48 @@ func (ec *executionContext) _Query_get_broker_items(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.BrokerItemsPage)
+	res := resTmp.(*model.BrokerPageResponse)
 	fc.Result = res
-	return ec.marshalOBrokerItemsPage2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerItemsPage(ctx, field.Selections, res)
+	return ec.marshalOBrokerPageResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerPageResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getWorkerItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getWorkerItems_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetWorkerItems(rctx, args["page"].(*model.GetWorkerItemsInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.WorkerPageResponse)
+	fc.Result = res
+	return ec.marshalOWorkerPageResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorkerPageResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1067,7 +1162,7 @@ func (ec *executionContext) _Task_msg(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Timestamppb_seconds(ctx context.Context, field graphql.CollectedField, obj *model.Timestamppb) (ret graphql.Marshaler) {
+func (ec *executionContext) _WorkerPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1075,7 +1170,7 @@ func (ec *executionContext) _Timestamppb_seconds(ctx context.Context, field grap
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Timestamppb",
+		Object:     "WorkerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1085,21 +1180,24 @@ func (ec *executionContext) _Timestamppb_seconds(ctx context.Context, field grap
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Seconds, nil
+		return obj.TotalItems, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Timestamppb_nanos(ctx context.Context, field graphql.CollectedField, obj *model.Timestamppb) (ret graphql.Marshaler) {
+func (ec *executionContext) _WorkerPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1107,7 +1205,7 @@ func (ec *executionContext) _Timestamppb_nanos(ctx context.Context, field graphq
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Timestamppb",
+		Object:     "WorkerPageResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1117,7 +1215,77 @@ func (ec *executionContext) _Timestamppb_nanos(ctx context.Context, field graphq
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Nanos, nil
+		return obj.TotalPages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorkerPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorkerPageResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrentPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _WorkerPageResponse_items(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "WorkerPageResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Items, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1126,9 +1294,9 @@ func (ec *executionContext) _Timestamppb_nanos(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int64)
+	res := resTmp.([]*model.Worker)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
+	return ec.marshalOWorkerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2274,6 +2442,34 @@ func (ec *executionContext) unmarshalInputGetBrokerItemsInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGetWorkerItemsInput(ctx context.Context, obj interface{}) (model.GetWorkerItemsInput, error) {
+	var it model.GetWorkerItemsInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "index":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("index"))
+			it.Index, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "size":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("size"))
+			it.Size, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj interface{}) (model.TaskInput, error) {
 	var it model.TaskInput
 	var asMap = obj.(map[string]interface{})
@@ -2342,34 +2538,34 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 
 // region    **************************** object.gotpl ****************************
 
-var brokerItemsPageImplementors = []string{"BrokerItemsPage"}
+var brokerPageResponseImplementors = []string{"BrokerPageResponse"}
 
-func (ec *executionContext) _BrokerItemsPage(ctx context.Context, sel ast.SelectionSet, obj *model.BrokerItemsPage) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, brokerItemsPageImplementors)
+func (ec *executionContext) _BrokerPageResponse(ctx context.Context, sel ast.SelectionSet, obj *model.BrokerPageResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, brokerPageResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("BrokerItemsPage")
+			out.Values[i] = graphql.MarshalString("BrokerPageResponse")
 		case "totalItems":
-			out.Values[i] = ec._BrokerItemsPage_totalItems(ctx, field, obj)
+			out.Values[i] = ec._BrokerPageResponse_totalItems(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "totalPages":
-			out.Values[i] = ec._BrokerItemsPage_totalPages(ctx, field, obj)
+			out.Values[i] = ec._BrokerPageResponse_totalPages(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "currentPage":
-			out.Values[i] = ec._BrokerItemsPage_currentPage(ctx, field, obj)
+			out.Values[i] = ec._BrokerPageResponse_currentPage(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "items":
-			out.Values[i] = ec._BrokerItemsPage_items(ctx, field, obj)
+			out.Values[i] = ec._BrokerPageResponse_items(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2494,7 +2690,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_search(ctx, field)
 				return res
 			})
-		case "get_broker_items":
+		case "getBrokerItems":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -2502,7 +2698,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_get_broker_items(ctx, field)
+				res = ec._Query_getBrokerItems(ctx, field)
+				return res
+			})
+		case "getWorkerItems":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getWorkerItems(ctx, field)
 				return res
 			})
 		case "__type":
@@ -2552,21 +2759,34 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var timestamppbImplementors = []string{"Timestamppb"}
+var workerPageResponseImplementors = []string{"WorkerPageResponse"}
 
-func (ec *executionContext) _Timestamppb(ctx context.Context, sel ast.SelectionSet, obj *model.Timestamppb) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, timestamppbImplementors)
+func (ec *executionContext) _WorkerPageResponse(ctx context.Context, sel ast.SelectionSet, obj *model.WorkerPageResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, workerPageResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Timestamppb")
-		case "seconds":
-			out.Values[i] = ec._Timestamppb_seconds(ctx, field, obj)
-		case "nanos":
-			out.Values[i] = ec._Timestamppb_nanos(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("WorkerPageResponse")
+		case "totalItems":
+			out.Values[i] = ec._WorkerPageResponse_totalItems(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "totalPages":
+			out.Values[i] = ec._WorkerPageResponse_totalPages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "currentPage":
+			out.Values[i] = ec._WorkerPageResponse_currentPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "items":
+			out.Values[i] = ec._WorkerPageResponse_items(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3206,14 +3426,14 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOBrokerItemsPage2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerItemsPage(ctx context.Context, sel ast.SelectionSet, v *model.BrokerItemsPage) graphql.Marshaler {
+func (ec *executionContext) marshalOBrokerPageResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerPageResponse(ctx context.Context, sel ast.SelectionSet, v *model.BrokerPageResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._BrokerItemsPage(ctx, sel, v)
+	return ec._BrokerPageResponse(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOBrokerRegister2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx context.Context, v interface{}) ([]*model.BrokerRegister, error) {
+func (ec *executionContext) unmarshalOBrokerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx context.Context, v interface{}) ([]*model.Broker, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -3226,10 +3446,10 @@ func (ec *executionContext) unmarshalOBrokerRegister2ᚕᚖgithubᚗcomᚋsunzho
 		}
 	}
 	var err error
-	res := make([]*model.BrokerRegister, len(vSlice))
+	res := make([]*model.Broker, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOBrokerRegister2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOBrokerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -3237,31 +3457,31 @@ func (ec *executionContext) unmarshalOBrokerRegister2ᚕᚖgithubᚗcomᚋsunzho
 	return res, nil
 }
 
-func (ec *executionContext) marshalOBrokerRegister2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx context.Context, sel ast.SelectionSet, v []*model.BrokerRegister) graphql.Marshaler {
+func (ec *executionContext) marshalOBrokerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx context.Context, sel ast.SelectionSet, v []*model.Broker) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
 	for i := range v {
-		ret[i] = ec.marshalOBrokerRegister2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx, sel, v[i])
+		ret[i] = ec.marshalOBrokerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx, sel, v[i])
 	}
 
 	return ret
 }
 
-func (ec *executionContext) unmarshalOBrokerRegister2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx context.Context, v interface{}) (*model.BrokerRegister, error) {
+func (ec *executionContext) unmarshalOBrokerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx context.Context, v interface{}) (*model.Broker, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalInputBrokerRegister(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	res, err := scalar.UnmarshalBrokerScalar(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOBrokerRegister2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBrokerRegister(ctx context.Context, sel ast.SelectionSet, v *model.BrokerRegister) graphql.Marshaler {
+func (ec *executionContext) marshalOBrokerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx context.Context, sel ast.SelectionSet, v *model.Broker) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._BrokerRegister(ctx, sel, v)
+	return scalar.MarshalBrokerScalar(v)
 }
 
 func (ec *executionContext) marshalOCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx context.Context, sel ast.SelectionSet, v *model.Character) graphql.Marshaler {
@@ -3279,19 +3499,12 @@ func (ec *executionContext) unmarshalOGetBrokerItemsInput2ᚖgithubᚗcomᚋsunz
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
+func (ec *executionContext) unmarshalOGetWorkerItemsInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetWorkerItemsInput(ctx context.Context, v interface{}) (*model.GetWorkerItemsInput, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalInt64(v)
+	res, err := ec.unmarshalInputGetWorkerItemsInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalInt64(*v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3324,6 +3537,64 @@ func (ec *executionContext) unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan19
 	}
 	res, err := ec.unmarshalInputTaskInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOWorkerPageResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorkerPageResponse(ctx context.Context, sel ast.SelectionSet, v *model.WorkerPageResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._WorkerPageResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOWorkerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx context.Context, v interface{}) ([]*model.Worker, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*model.Worker, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOWorkerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOWorkerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx context.Context, sel ast.SelectionSet, v []*model.Worker) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOWorkerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOWorkerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx context.Context, v interface{}) (*model.Worker, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := scalar.UnmarshalWorkerScalar(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOWorkerScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐWorker(ctx context.Context, sel ast.SelectionSet, v *model.Worker) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return scalar.MarshalWorkerScalar(v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
