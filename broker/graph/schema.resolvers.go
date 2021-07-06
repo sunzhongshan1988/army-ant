@@ -63,7 +63,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		},
 	}
 
-	grpc.SendTask(request)
+	grpc.SendTask(request, task.WorkerID)
 
 	res := &model.Task{
 		Status: 0,
@@ -116,6 +116,24 @@ func (r *queryResolver) GetWorkerItems(ctx context.Context, page *model.GetWorke
 	dbRes, _ := workerService.FindAll(bson.M{}, pg)
 
 	res := &model.WorkerPageResponse{
+		TotalPages:  dbRes.TotalPages,
+		TotalItems:  dbRes.TotalItems,
+		CurrentPage: dbRes.CurrentPage,
+		Items:       dbRes.Items,
+	}
+	return res, nil
+}
+
+func (r *queryResolver) GetTaskResultItems(ctx context.Context, page *model.GetTaskResultItemsInput) (*model.TaskResultPageResponse, error) {
+	taskResultService := service.TaskResult{}
+
+	pg := &model.PageableRequest{
+		Index: page.Index,
+		Size:  page.Size,
+	}
+	dbRes, _ := taskResultService.FindAll(bson.M{}, pg)
+
+	res := &model.TaskResultPageResponse{
 		TotalPages:  dbRes.TotalPages,
 		TotalItems:  dbRes.TotalItems,
 		CurrentPage: dbRes.CurrentPage,

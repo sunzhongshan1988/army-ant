@@ -14,6 +14,7 @@ type Query {
   search(name: String!): Character
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
+  getTaskResultItems(page: GetTaskResultItemsInput): TaskResultPageResponse
  }
 
 # This is a mutation we will be doing
@@ -73,6 +74,18 @@ type WorkerPageResponse {
   items: [WorkerScalar]
 }
 
+# Get Task Result
+input GetTaskResultItemsInput {
+  index: Int!
+  size: Int!
+}
+type TaskResultPageResponse {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  items: [TaskResultScalar]
+}
 
 scalar BrokerScalar
 scalar WorkerScalar
+scalar TaskResultScalar

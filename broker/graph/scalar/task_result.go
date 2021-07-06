@@ -8,7 +8,7 @@ import (
 	"io"
 )
 
-func MarshalBrokerScalar(b *model.Broker) graphql.Marshaler {
+func MarshalTaskResultScalar(b *model.TaskResult) graphql.Marshaler {
 	jsonByte, err := json.Marshal(b)
 	return graphql.WriterFunc(func(w io.Writer) {
 		if err == nil {
@@ -19,8 +19,8 @@ func MarshalBrokerScalar(b *model.Broker) graphql.Marshaler {
 	})
 }
 
-func UnmarshalBrokerScalar(v interface{}) (*model.Broker, error) {
-	b := &model.Broker{}
+func UnmarshalTaskResultScalar(v interface{}) (*model.TaskResult, error) {
+	b := &model.TaskResult{}
 
 	str, ok := v.(string)
 	if !ok {

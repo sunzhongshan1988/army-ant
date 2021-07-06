@@ -24,10 +24,10 @@ func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mon
 
 	insertResult, err := r.Client.Database("armyant").Collection("broker").InsertOne(ctx, broker)
 	if err != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb,save] error:%v", err)
 	}
 
-	log.Printf("MongoDB Save: %v", insertResult.InsertedID)
+	log.Printf("[mongodb,save] info: %v", insertResult.InsertedID)
 
 	return insertResult, nil
 }

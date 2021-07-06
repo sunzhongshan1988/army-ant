@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/sunzhongshan1988/army-ant/broker/service"
+	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc"
 	"log"
 	"time"
@@ -14,9 +16,16 @@ const (
 	workerAddress = "localhost:50052"
 )
 
-func SendTask(request *pb.TaskRequest) {
+func SendTask(request *pb.TaskRequest, workerId string) {
+	workerService := service.Worker{}
+
+	filter := bson.M{"worker_id": workerId}
+	worker, err := workerService.FindOne(filter)
+	if err != nil {
+		log.Printf("[service, sendTask] error: %v", "find worker")
+	}
 	// Set up a connection to the broker.
-	conn, err1 := grpc.Dial(workerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err1 := grpc.Dial(worker.WorkerLink, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {
 		log.Fatalf("did not connect: %v", err1)
 	}

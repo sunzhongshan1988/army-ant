@@ -25,6 +25,11 @@ type GetBrokerItemsInput struct {
 	Size  int64 `json:"size"`
 }
 
+type GetTaskResultItemsInput struct {
+	Index int64 `json:"index"`
+	Size  int64 `json:"size"`
+}
+
 type GetWorkerItemsInput struct {
 	Index int64 `json:"index"`
 	Size  int64 `json:"size"`
@@ -42,6 +47,13 @@ type TaskInput struct {
 	Type     string `json:"type"`
 	Dna      string `json:"dna"`
 	Mutation string `json:"mutation"`
+}
+
+type TaskResultPageResponse struct {
+	TotalItems  int64         `json:"totalItems"`
+	TotalPages  int64         `json:"totalPages"`
+	CurrentPage int64         `json:"currentPage"`
+	Items       []*TaskResult `json:"items"`
 }
 
 type WorkerPageResponse struct {

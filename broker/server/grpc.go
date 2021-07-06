@@ -84,7 +84,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 // TaskResult implements WorkerRegister.GreeterServer
 func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.TaskResultResponse, error) {
 
-	var taskResultService = service.TaskResultService{}
+	var taskResultService = service.TaskResult{}
 
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
