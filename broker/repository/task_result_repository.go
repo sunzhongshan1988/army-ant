@@ -37,6 +37,8 @@ func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *mode
 	result := model.TaskResultItemsPage{}
 
 	findOptions := &options.FindOptions{}
+	findOptions.SetSort(bson.M{"_id": -1})
+
 	if page.Size > 0 {
 		findOptions.SetLimit(page.Size)
 		findOptions.SetSkip(page.Index * page.Size)

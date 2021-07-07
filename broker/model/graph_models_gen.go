@@ -44,7 +44,7 @@ type TaskInput struct {
 	ID       string `json:"id"`
 	BrokerID string `json:"broker_id"`
 	WorkerID string `json:"worker_id"`
-	Type     string `json:"type"`
+	Type     int64  `json:"type"`
 	Dna      string `json:"dna"`
 	Mutation string `json:"mutation"`
 }

@@ -52,7 +52,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	request := &pb.TaskRequest{
 		Id:   task.ID,
-		Type: pb.TaskType_NOW,
+		Type: task.Type,
 		Dna: &pb.DNA{
 			Cmd: &pb.Command{
 				App:  m.Cmd.App,

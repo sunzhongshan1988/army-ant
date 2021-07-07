@@ -422,7 +422,7 @@ input TaskInput {
   id: String!
   broker_id: String!
   worker_id: String!
-  type: String!
+  type: Int!
   dna: String!
   mutation: String!
 }
@@ -2785,7 +2785,7 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			it.Type, err = ec.unmarshalNString2string(ctx, v)
+			it.Type, err = ec.unmarshalNInt2int64(ctx, v)
 			if err != nil {
 				return it, err
 			}

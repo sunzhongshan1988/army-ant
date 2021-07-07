@@ -62,14 +62,10 @@ message TaskResultResponse {
 /**
 * Task request
 */
-enum TaskType {
-  NOW = 0;
-  TIMED = 1;
-  SCHEDULED = 2;
-}
+
 message TaskRequest {
   string id = 10;
-  TaskType type = 12;
+  int64 type = 12;
   DNA dna = 14;
 }
 message DNA {

@@ -17,6 +17,7 @@ type Input struct {
 
 func Standard(input Input) {
 	var out string
+	var status int32
 	startAt := ptypes.TimestampNow()
 
 	cmd := exec.Command(input.App, input.Args...)
@@ -24,29 +25,31 @@ func Standard(input Input) {
 
 	stdout, errSo := cmd.StdoutPipe()
 	if errSo != nil {
-		log.Printf("%s", errSo)
+		log.Printf("[command,stdoutpipe] error: %s", errSo)
 	}
 
 	stderr, errSe := cmd.StderrPipe()
 	if errSe != nil {
-		log.Fatal(errSe)
+		log.Printf("[command,stderrpipe] error: %s", errSe)
 	}
 
 	errStt := cmd.Start()
 	if errStt != nil {
 		b, _ := ioutil.ReadAll(stderr)
+		status = 1
 		out = string(b)
 		// stdoutReader.ReadRune()
 	} else {
 		b, _ := ioutil.ReadAll(stdout)
+		status = 0
 		out = string(b)
 	}
 
 	if errWt := cmd.Wait(); errWt != nil {
-		log.Fatal(errWt)
+		log.Printf("[command,wait] error: %s", errWt)
 	}
 
-	log.Printf("command out: %v", out)
+	log.Printf("[command,wait] info: %v", out)
 
-	grpc.TaskResult(out, 1, startAt, ptypes.TimestampNow())
+	grpc.TaskResult(out, status, startAt, ptypes.TimestampNow())
 }

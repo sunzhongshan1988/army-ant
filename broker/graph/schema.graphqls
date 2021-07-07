@@ -41,7 +41,7 @@ input TaskInput {
   id: String!
   broker_id: String!
   worker_id: String!
-  type: String!
+  type: Int!
   dna: String!
   mutation: String!
 }
