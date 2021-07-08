@@ -423,6 +423,7 @@ input TaskInput {
   broker_id: String!
   worker_id: String!
   type: Int!
+  cron: String!
   dna: String!
   mutation: String!
 }
@@ -2786,6 +2787,14 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			it.Type, err = ec.unmarshalNInt2int64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "cron":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cron"))
+			it.Cron, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -22,12 +22,12 @@ func SendTask(request *pb.TaskRequest, workerId string) {
 	filter := bson.M{"worker_id": workerId}
 	worker, err := workerService.FindOne(filter)
 	if err != nil {
-		log.Printf("[service, sendTask] error: %v", "find worker")
+		log.Printf("[grpc, sendtask] error: %v", err)
 	}
 	// Set up a connection to the broker.
 	conn, err1 := grpc.Dial(worker.WorkerLink, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {
-		log.Fatalf("did not connect: %v", err1)
+		log.Printf("[grpc, sendtask] error: %v", err1)
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
@@ -38,12 +38,12 @@ func SendTask(request *pb.TaskRequest, workerId string) {
 
 	r, err2 := c.SendTask(ctx, request)
 	if err2 != nil {
-		log.Fatalf("Error: could not greet: %v", err2)
+		log.Printf("[grpc, sendtask] error: %v", err2)
 	}
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(r)
-	log.Printf("Worker Response: %s", jsonStr)
+	log.Printf("[grpc, sendtask] info: %v", jsonStr)
 }

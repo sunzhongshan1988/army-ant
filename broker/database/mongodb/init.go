@@ -32,7 +32,7 @@ func Init() *mongo.Client {
 	if err := Client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	}
-	log.Printf("MongoDB: Successfully connected and pinged.")
+	log.Printf("[mongodb, init] info: Successfully connected and pinged.")
 
 	return Client
 }

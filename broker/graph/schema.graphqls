@@ -42,6 +42,7 @@ input TaskInput {
   broker_id: String!
   worker_id: String!
   type: Int!
+  cron: String!
   dna: String!
   mutation: String!
 }

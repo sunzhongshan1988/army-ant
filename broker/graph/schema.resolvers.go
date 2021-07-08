@@ -8,6 +8,8 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"log"
 	"math/rand"
 	"strings"
@@ -51,8 +53,11 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	}
 
 	request := &pb.TaskRequest{
-		Id:   task.ID,
-		Type: task.Type,
+		Id:       uuid.New().String(),
+		Type:     task.Type,
+		Cron:     task.Cron,
+		BrokerId: config.GetBrokerId(),
+		WorkerId: task.WorkerID,
 		Dna: &pb.DNA{
 			Cmd: &pb.Command{
 				App:  m.Cmd.App,

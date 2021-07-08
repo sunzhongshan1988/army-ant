@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/sunzhongshan1988/army-ant/worker/config"
+	"github.com/sunzhongshan1988/army-ant/worker/cronmod"
 	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
 	"google.golang.org/grpc"
 	"log"
@@ -47,11 +48,20 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	}
 
 	res := &pb.TaskResponse{
-		Status: 1,
+		Status: 0,
 		Msg:    "ok",
 	}
 
-	go pf.Standard(input)
+	switch in.Type {
+	case 0:
+		go pf.Standard(input)
+	case 1:
+		_, err := cronmod.AddFunc("*/10 * * * *", func() { pf.Standard(input) })
+		if err != nil {
+			res.Status = 1
+			res.Msg = err.Error()
+		}
+	}
 
 	return res, nil
 }
