@@ -8,12 +8,12 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"log"
 	"math/rand"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/grpc"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
@@ -33,7 +33,7 @@ func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInp
 	return charac, nil
 }
 
-func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.Task, error) {
+func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.TaskResponse, error) {
 	jsonStr, _ := json.Marshal(task)
 	log.Printf("Received Task: %v", string(jsonStr))
 
@@ -70,7 +70,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	grpc.SendTask(request, task.WorkerID)
 
-	res := &model.Task{
+	res := &model.TaskResponse{
 		Status: 0,
 		Msg:    "ok",
 	}

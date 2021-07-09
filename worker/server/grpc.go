@@ -56,7 +56,7 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	case 0:
 		go pf.Standard(input)
 	case 1:
-		_, err := cronmod.AddFunc("*/10 * * * *", func() { pf.Standard(input) })
+		_, err := cronmod.AddFunc(in.Cron, func() { pf.Standard(input) })
 		if err != nil {
 			res.Status = 1
 			res.Msg = err.Error()

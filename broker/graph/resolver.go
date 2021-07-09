@@ -12,6 +12,6 @@ import (
 
 type Resolver struct {
 	characters  []*model.Character
-	tasks       []*model.Task
+	tasks       []*model.TaskResponse
 	brokerItems []*model.BrokerPageResponse
 }

@@ -20,7 +20,7 @@ type Query {
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
-  receive_task(task: TaskInput): Task!
+  receive_task(task: TaskInput): TaskResponse!
 }
 
 # just a input type for our mutation
@@ -46,7 +46,7 @@ input TaskInput {
   dna: String!
   mutation: String!
 }
-type Task {
+type TaskResponse {
   status: Int!
   msg: String!
 }

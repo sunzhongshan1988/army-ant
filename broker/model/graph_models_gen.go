@@ -35,11 +35,6 @@ type GetWorkerItemsInput struct {
 	Size  int64 `json:"size"`
 }
 
-type Task struct {
-	Status int64  `json:"status"`
-	Msg    string `json:"msg"`
-}
-
 type TaskInput struct {
 	ID       string `json:"id"`
 	BrokerID string `json:"broker_id"`
@@ -48,6 +43,11 @@ type TaskInput struct {
 	Cron     string `json:"cron"`
 	Dna      string `json:"dna"`
 	Mutation string `json:"mutation"`
+}
+
+type TaskResponse struct {
+	Status int64  `json:"status"`
+	Msg    string `json:"msg"`
 }
 
 type TaskResultPageResponse struct {
