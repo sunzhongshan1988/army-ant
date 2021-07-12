@@ -68,32 +68,31 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		},
 	}
 
+	entryId, sendStatus := grpc.SendTask(request, task.WorkerID)
+
 	res := &model.TaskResponse{
 		Status: 0,
 		Msg:    "ok",
 	}
-
-	sendStatus := grpc.SendTask(request, task.WorkerID)
-
-	taskDb := &model.Task{
-		BrokerId: config.GetBrokerId(),
-		WorkerId: task.WorkerID,
-		EntryId:  0,
-		Type:     task.Type,
-		Status:   0,
-		Cron:     task.Cron,
-		DNA:      task.Dna,
-		Mutation: task.Mutation,
-		CreateAt: ptypes.TimestampNow(),
-		UpdateAt: ptypes.TimestampNow(),
-	}
-
-	if sendStatus == false {
-		taskDb.Status = 1
+	if sendStatus == 1 {
 		res.Status = 1
+		res.Msg = "send task to worker error"
 	}
 
-	if sendStatus == true {
+	if sendStatus == 0 {
+		taskDb := &model.Task{
+			BrokerId: config.GetBrokerId(),
+			WorkerId: task.WorkerID,
+			EntryId:  entryId,
+			Type:     task.Type,
+			Status:   sendStatus,
+			Cron:     task.Cron,
+			DNA:      task.Dna,
+			Mutation: task.Mutation,
+			CreateAt: ptypes.TimestampNow(),
+			UpdateAt: ptypes.TimestampNow(),
+		}
+
 		taskService := service.Task{}
 		_, err2 := taskService.InsertOne(taskDb)
 		if err2 != nil {
