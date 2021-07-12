@@ -48,19 +48,24 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 	}
 
 	res := &pb.TaskResponse{
-		Status: 0,
-		Msg:    "ok",
+		Status:  0,
+		EntryId: 0,
+		Msg:     "ok",
 	}
 
 	switch in.Type {
 	case 0:
 		go pf.Standard(input)
 	case 1:
-		_, err := cronmod.AddFunc(in.Cron, func() { pf.Standard(input) })
+		entryId, err := cronmod.AddFunc(in.Cron, func() { pf.Standard(input) })
 		if err != nil {
 			res.Status = 1
 			res.Msg = err.Error()
 		}
+		res.Status = 0
+		res.EntryId = int32(entryId)
+		res.Msg = "ok"
+
 	}
 
 	return res, nil

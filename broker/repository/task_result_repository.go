@@ -29,7 +29,7 @@ func (r *TaskResultMongo) InsertOne(ctx context.Context, worker *model.TaskResul
 
 	log.Printf("[mongodb,save] info: %v", insertResult.InsertedID)
 
-	return insertResult, nil
+	return insertResult, err
 }
 
 func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskResultItemsPage, error) {
@@ -67,5 +67,5 @@ func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *mode
 
 	log.Printf("[mongodb, findall] info: %v", "success")
 
-	return &result, nil
+	return &result, err
 }

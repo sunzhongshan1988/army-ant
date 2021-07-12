@@ -470,7 +470,9 @@ type TaskResultPageResponse {
 
 scalar BrokerScalar
 scalar WorkerScalar
-scalar TaskResultScalar`, BuiltIn: false},
+scalar TaskScalar
+scalar TaskResultScalar
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 

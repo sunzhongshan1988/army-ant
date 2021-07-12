@@ -8,10 +8,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
-	"math/rand"
-	"strings"
-
+	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
@@ -20,6 +17,9 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
+	"log"
+	"math/rand"
+	"strings"
 )
 
 func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInput) (*model.Character, error) {
@@ -68,14 +68,43 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		},
 	}
 
-	grpc.SendTask(request, task.WorkerID)
-
 	res := &model.TaskResponse{
 		Status: 0,
 		Msg:    "ok",
 	}
 
-	r.tasks = append(r.tasks, res)
+	sendStatus := grpc.SendTask(request, task.WorkerID)
+
+	taskDb := &model.Task{
+		BrokerId: config.GetBrokerId(),
+		WorkerId: task.WorkerID,
+		EntryId:  0,
+		Type:     task.Type,
+		Status:   0,
+		Cron:     task.Cron,
+		DNA:      task.Dna,
+		Mutation: task.Mutation,
+		CreateAt: ptypes.TimestampNow(),
+		UpdateAt: ptypes.TimestampNow(),
+	}
+
+	if sendStatus == false {
+		taskDb.Status = 1
+		res.Status = 1
+	}
+
+	if sendStatus == true {
+		taskService := service.Task{}
+		_, err2 := taskService.InsertOne(taskDb)
+		if err2 != nil {
+			res.Status = 1
+			res.Msg = "Broker DB error!"
+
+			return res, nil
+		}
+	}
+
+	//r.tasks = append(r.tasks, res)
 	return res, nil
 }
 

@@ -29,7 +29,7 @@ func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mon
 
 	log.Printf("[mongodb,save] info: %v", insertResult.InsertedID)
 
-	return insertResult, nil
+	return insertResult, err
 }
 
 func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker, error) {
@@ -45,7 +45,7 @@ func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker
 
 	log.Printf("MongoDB FindOne: %v", "success")
 
-	return &result, nil
+	return &result, err
 }
 
 func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerItemsPage, error) {
@@ -82,5 +82,5 @@ func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 
 	log.Printf("MongoDB Find: %v", "success")
 
-	return &result, nil
+	return &result, err
 }

@@ -58,5 +58,7 @@ models:
     model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.BrokerScalar
   WorkerScalar:
     model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.WorkerScalar
+  TaskScalar:
+    model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.TaskScalar
   TaskResultScalar:
     model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.TaskResultScalar

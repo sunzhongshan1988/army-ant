@@ -12,22 +12,20 @@ import (
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 )
 
-const (
-	workerAddress = "localhost:50052"
-)
-
-func SendTask(request *pb.TaskRequest, workerId string) {
+func SendTask(request *pb.TaskRequest, workerId string) (status bool) {
 	workerService := service.Worker{}
 
 	filter := bson.M{"worker_id": workerId}
 	worker, err := workerService.FindOne(filter)
 	if err != nil {
 		log.Printf("[grpc, sendtask] error: %v", err)
+		return false
 	}
 	// Set up a connection to the broker.
 	conn, err1 := grpc.Dial(worker.WorkerLink, grpc.WithInsecure(), grpc.WithBlock())
 	if err1 != nil {
 		log.Printf("[grpc, sendtask] error: %v", err1)
+		return false
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
@@ -39,6 +37,7 @@ func SendTask(request *pb.TaskRequest, workerId string) {
 	r, err2 := c.SendTask(ctx, request)
 	if err2 != nil {
 		log.Printf("[grpc, sendtask] error: %v", err2)
+		return false
 	}
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -46,4 +45,5 @@ func SendTask(request *pb.TaskRequest, workerId string) {
 	}
 	jsonStr, _ := m.MarshalToString(r)
 	log.Printf("[grpc, sendtask] info: %v", jsonStr)
+	return true
 }

@@ -29,7 +29,7 @@ func (r *WorkerMongo) InsertOne(ctx context.Context, worker *model.Worker) (*mon
 
 	log.Printf("[mongodb,save]: %v", insertResult.InsertedID)
 
-	return insertResult, nil
+	return insertResult, err
 }
 
 func (r *WorkerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Worker, error) {
@@ -45,7 +45,7 @@ func (r *WorkerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Worker
 
 	log.Printf("MongoDB FindOne: %v", "success")
 
-	return &result, nil
+	return &result, err
 }
 
 func (r *WorkerMongo) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.WorkerItemsPage, error) {
@@ -82,5 +82,5 @@ func (r *WorkerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 
 	log.Printf("[mongo,query]: %v", "success")
 
-	return &result, nil
+	return &result, err
 }
