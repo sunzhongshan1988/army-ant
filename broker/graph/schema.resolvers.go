@@ -8,8 +8,11 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
+	"math/rand"
+	"strings"
+
 	"github.com/golang/protobuf/ptypes"
-	"github.com/google/uuid"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/grpc"
@@ -17,9 +20,6 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
-	"log"
-	"math/rand"
-	"strings"
 )
 
 func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInput) (*model.Character, error) {
@@ -53,7 +53,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	}
 
 	request := &pb.TaskRequest{
-		Id:       uuid.New().String(),
+		Id:       task.InstanceID,
 		Type:     task.Type,
 		Cron:     task.Cron,
 		BrokerId: config.GetBrokerId(),
@@ -81,16 +81,17 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	if sendStatus == 0 {
 		taskDb := &model.Task{
-			BrokerId: config.GetBrokerId(),
-			WorkerId: task.WorkerID,
-			EntryId:  entryId,
-			Type:     task.Type,
-			Status:   sendStatus,
-			Cron:     task.Cron,
-			DNA:      task.Dna,
-			Mutation: task.Mutation,
-			CreateAt: ptypes.TimestampNow(),
-			UpdateAt: ptypes.TimestampNow(),
+			InstanceId: task.InstanceID,
+			BrokerId:   config.GetBrokerId(),
+			WorkerId:   task.WorkerID,
+			EntryId:    entryId,
+			Type:       task.Type,
+			Status:     sendStatus,
+			Cron:       task.Cron,
+			DNA:        task.Dna,
+			Mutation:   task.Mutation,
+			CreateAt:   ptypes.TimestampNow(),
+			UpdateAt:   ptypes.TimestampNow(),
 		}
 
 		taskService := service.Task{}
@@ -104,6 +105,48 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	}
 
 	//r.tasks = append(r.tasks, res)
+	return res, nil
+}
+
+func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInput) (*model.StopTaskResponse, error) {
+	jsonStr, _ := json.Marshal(task)
+	log.Printf("[graphql, stoptask] info: %v", string(jsonStr))
+
+	res := &model.StopTaskResponse{
+		Status: 1,
+		Msg:    "error",
+	}
+
+	req := &pb.StopTaskRequest{
+		Id:       task.InstanceID,
+		BrokerId: task.BrokerID,
+		WorkerId: task.WorkerID,
+		EntryId:  0,
+	}
+	taskService := service.Task{}
+	filter := bson.M{"instance_id": task.InstanceID, "worker_id": task.WorkerID}
+	dbtask, err := taskService.FindOne(filter)
+	if err != nil {
+		res.Msg = "query db error"
+		return res, err
+	}
+	req.EntryId = dbtask.EntryId
+	grpcres, err1 := grpc.StopTask(req)
+	if err1 != nil {
+		res.Msg = "send to worker error"
+		return res, err1
+	}
+
+	filter1 := bson.M{"worker_id": task.WorkerID}
+	update := bson.M{"$set": bson.M{"status": 1}}
+	_, err2 := taskService.UpdateOne(filter1, update)
+	if err2 != nil {
+		res.Msg = "update db error"
+		return res, err
+	}
+
+	res.Status = 1
+	res.Msg = grpcres.Msg
 	return res, nil
 }
 

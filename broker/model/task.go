@@ -6,17 +6,18 @@ import (
 )
 
 type Task struct {
-	ID       primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
-	BrokerId string                 `bson:"broker_id,omitempty" json:"brokerId"`
-	WorkerId string                 `bson:"worker_id,omitempty" json:"workerId"`
-	EntryId  int32                  `bson:"entry_id,omitempty" json:"entryId"`
-	Type     int64                  `bson:"type" json:"type"`
-	Status   int32                  `bson:"status" json:"status"`
-	Cron     string                 `bson:"cron,omitempty" json:"cron"`
-	DNA      string                 `bson:"dna" json:"dna"`
-	Mutation string                 `bson:"mutation" json:"mutation"`
-	CreateAt *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
-	UpdateAt *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`
+	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
+	InstanceId string                 `bson:"instance_id,omitempty" json:"instanceId"`
+	BrokerId   string                 `bson:"broker_id,omitempty" json:"brokerId"`
+	WorkerId   string                 `bson:"worker_id,omitempty" json:"workerId"`
+	EntryId    int32                  `bson:"entry_id,omitempty" json:"entryId"`
+	Type       int64                  `bson:"type" json:"type"`
+	Status     int32                  `bson:"status" json:"status"`
+	Cron       string                 `bson:"cron,omitempty" json:"cron"`
+	DNA        string                 `bson:"dna" json:"dna"`
+	Mutation   string                 `bson:"mutation" json:"mutation"`
+	CreateAt   *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
+	UpdateAt   *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`
 }
 
 type Command struct {

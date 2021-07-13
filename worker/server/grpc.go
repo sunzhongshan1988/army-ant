@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/robfig/cron/v3"
 	"github.com/sunzhongshan1988/army-ant/worker/config"
 	"github.com/sunzhongshan1988/army-ant/worker/cronmod"
 	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
@@ -33,13 +34,13 @@ func Grpc() {
 }
 
 // SendTask implements SendTask.GreeterServer
-func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse, error) {
+func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse, error) {
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(in)
-	log.Printf("Task: %v", jsonStr)
+	log.Printf("[grpc, task] info: %v", jsonStr)
 
 	input := pf.Input{
 		App:  in.Dna.Cmd.App,
@@ -67,6 +68,25 @@ func (s *server) SendTask(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResp
 		res.Msg = "ok"
 
 	}
+
+	return res, nil
+}
+
+// StopTask implements StopTask.GreeterServer
+func (s *server) StopTask(ctx context.Context, in *pb.StopTaskRequest) (*pb.StopTaskResponse, error) {
+	m := jsonpb.Marshaler{
+		EmitDefaults: true,
+		OrigName:     true,
+	}
+	jsonStr, _ := m.MarshalToString(in)
+	log.Printf("[grpc, stoptask] info: %v", jsonStr)
+
+	res := &pb.StopTaskResponse{
+		Status: 1,
+		Msg:    "ok",
+	}
+
+	cronmod.Remove(cron.EntryID(in.EntryId))
 
 	return res, nil
 }

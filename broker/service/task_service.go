@@ -10,11 +10,17 @@ import (
 )
 
 type TaskService interface {
+	FindOne(filter bson.M) (*model.Task, error)
 	InsertOne(worker *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 }
 
 type Task struct {
+}
+
+func (s *Task) FindOne(filter bson.M) (*model.Task, error) {
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mongodb.Client}
+	return taskRepo.FindOne(context.TODO(), filter)
 }
 
 func (s *Task) InsertOne(tr *model.Task) (*mongo.InsertOneResult, error) {

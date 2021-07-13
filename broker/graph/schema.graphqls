@@ -21,6 +21,7 @@ type Query {
 type Mutation {
   add(character: CharacterInput!): Character!
   receive_task(task: TaskInput): TaskResponse!
+  stopTask(task: StopTaskInput): StopTaskResponse!
 }
 
 # just a input type for our mutation
@@ -38,9 +39,9 @@ type Character {
 
 # receive a task
 input TaskInput {
-  id: String!
-  broker_id: String!
-  worker_id: String!
+  instanceId: String!
+  brokerId: String!
+  workerId: String!
   type: Int!
   cron: String!
   dna: String!
@@ -87,6 +88,18 @@ type TaskResultPageResponse {
   items: [TaskResultScalar]
 }
 
+# Stop Task
+input StopTaskInput {
+  instanceId: String!
+  brokerId: String!
+  workerId: String!
+}
+type StopTaskResponse {
+  status: Int32!
+  msg: String!
+}
+
+scalar Int32
 scalar BrokerScalar
 scalar WorkerScalar
 scalar TaskScalar

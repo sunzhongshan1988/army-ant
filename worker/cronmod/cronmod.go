@@ -25,3 +25,7 @@ func AddFunc(spec string, cmd func()) (cron.EntryID, error) {
 	}
 	return entryID, err
 }
+
+func Remove(id cron.EntryID) {
+	CronInstance.Remove(id)
+}

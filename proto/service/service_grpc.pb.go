@@ -18,11 +18,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreeterClient interface {
-	// Broker
+	// Broker server
 	WorkerRegister(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	TaskResult(ctx context.Context, in *TaskResultRequest, opts ...grpc.CallOption) (*TaskResultResponse, error)
-	// Worker
-	SendTask(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	// Worker server
+	Task(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	StopTask(ctx context.Context, in *StopTaskRequest, opts ...grpc.CallOption) (*StopTaskResponse, error)
 }
 
 type greeterClient struct {
@@ -51,9 +52,18 @@ func (c *greeterClient) TaskResult(ctx context.Context, in *TaskResultRequest, o
 	return out, nil
 }
 
-func (c *greeterClient) SendTask(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
+func (c *greeterClient) Task(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
 	out := new(TaskResponse)
-	err := c.cc.Invoke(ctx, "/grpc.Greeter/SendTask", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/grpc.Greeter/Task", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *greeterClient) StopTask(ctx context.Context, in *StopTaskRequest, opts ...grpc.CallOption) (*StopTaskResponse, error) {
+	out := new(StopTaskResponse)
+	err := c.cc.Invoke(ctx, "/grpc.Greeter/StopTask", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,11 +74,12 @@ func (c *greeterClient) SendTask(ctx context.Context, in *TaskRequest, opts ...g
 // All implementations must embed UnimplementedGreeterServer
 // for forward compatibility
 type GreeterServer interface {
-	// Broker
+	// Broker server
 	WorkerRegister(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	TaskResult(context.Context, *TaskResultRequest) (*TaskResultResponse, error)
-	// Worker
-	SendTask(context.Context, *TaskRequest) (*TaskResponse, error)
+	// Worker server
+	Task(context.Context, *TaskRequest) (*TaskResponse, error)
+	StopTask(context.Context, *StopTaskRequest) (*StopTaskResponse, error)
 	mustEmbedUnimplementedGreeterServer()
 }
 
@@ -82,8 +93,11 @@ func (UnimplementedGreeterServer) WorkerRegister(context.Context, *RegisterReque
 func (UnimplementedGreeterServer) TaskResult(context.Context, *TaskResultRequest) (*TaskResultResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TaskResult not implemented")
 }
-func (UnimplementedGreeterServer) SendTask(context.Context, *TaskRequest) (*TaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendTask not implemented")
+func (UnimplementedGreeterServer) Task(context.Context, *TaskRequest) (*TaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Task not implemented")
+}
+func (UnimplementedGreeterServer) StopTask(context.Context, *StopTaskRequest) (*StopTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StopTask not implemented")
 }
 func (UnimplementedGreeterServer) mustEmbedUnimplementedGreeterServer() {}
 
@@ -134,20 +148,38 @@ func _Greeter_TaskResult_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Greeter_SendTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Greeter_Task_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TaskRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GreeterServer).SendTask(ctx, in)
+		return srv.(GreeterServer).Task(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/grpc.Greeter/SendTask",
+		FullMethod: "/grpc.Greeter/Task",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreeterServer).SendTask(ctx, req.(*TaskRequest))
+		return srv.(GreeterServer).Task(ctx, req.(*TaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Greeter_StopTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreeterServer).StopTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Greeter/StopTask",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreeterServer).StopTask(ctx, req.(*StopTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -168,8 +200,12 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Greeter_TaskResult_Handler,
 		},
 		{
-			MethodName: "SendTask",
-			Handler:    _Greeter_SendTask_Handler,
+			MethodName: "Task",
+			Handler:    _Greeter_Task_Handler,
+		},
+		{
+			MethodName: "StopTask",
+			Handler:    _Greeter_StopTask_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

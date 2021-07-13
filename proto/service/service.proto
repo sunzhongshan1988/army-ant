@@ -12,12 +12,13 @@ import "google/protobuf/timestamp.proto";
 
 // The greeting service definition.
 service Greeter {
-  // Broker
+  // Broker server
   rpc WorkerRegister (RegisterRequest) returns (RegisterResponse) {}
   rpc TaskResult (TaskResultRequest) returns (TaskResultResponse) {}
 
-  // Worker
-  rpc SendTask (TaskRequest) returns (TaskResponse) {}
+  // Worker server
+  rpc Task (TaskRequest) returns (TaskResponse) {}
+  rpc StopTask (StopTaskRequest) returns (StopTaskResponse) {}
 }
 
 /**
@@ -60,7 +61,7 @@ message TaskResultResponse {
 }
 
 /**
-* Task request
+* Send Task
 */
 
 message TaskRequest {
@@ -84,4 +85,18 @@ message TaskResponse {
   int32 status = 10;
   int32 entry_id = 11;
   string msg = 12;
+}
+
+/**
+* Stop Task
+ */
+message StopTaskRequest {
+  string id = 10;
+  string broker_id = 14;
+  string worker_id = 16;
+  int32  entry_id = 18;
+}
+message StopTaskResponse {
+  int32   status = 10;
+  string  msg = 12;
 }

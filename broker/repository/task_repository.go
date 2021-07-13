@@ -9,12 +9,29 @@ import (
 )
 
 type TaskRepository interface {
+	FindOne(ctx context.Context, filter bson.M) (*model.Task, error)
 	InsertOne(ctx context.Context, tr *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 }
 
 type TaskMongo struct {
 	Client *mongo.Client
+}
+
+func (r *TaskMongo) FindOne(ctx context.Context, filter bson.M) (*model.Task, error) {
+
+	var result model.Task
+
+	err := r.Client.Database("armyant").Collection("task").FindOne(ctx, filter).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	} else if err != nil {
+		log.Printf("[mongodb, findone] error: %v", err)
+	}
+
+	log.Printf("[mongodb, findone] info: %v", "success")
+
+	return &result, err
 }
 
 func (r *TaskMongo) InsertOne(ctx context.Context, worker *model.Task) (*mongo.InsertOneResult, error) {
