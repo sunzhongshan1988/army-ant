@@ -124,7 +124,7 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 		EntryId:  0,
 	}
 	taskService := service.Task{}
-	filter := bson.M{"instance_id": task.InstanceID, "worker_id": task.WorkerID}
+	filter := bson.M{"instance_id": task.InstanceID, "worker_id": task.WorkerID, "status": 0}
 	dbtask, err := taskService.FindOne(filter)
 	if err != nil {
 		res.Msg = "query db error"
@@ -137,7 +137,7 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 		return res, err1
 	}
 
-	filter1 := bson.M{"worker_id": task.WorkerID}
+	filter1 := bson.M{"_id": dbtask.ID}
 	update := bson.M{"$set": bson.M{"status": 1}}
 	_, err2 := taskService.UpdateOne(filter1, update)
 	if err2 != nil {
@@ -145,7 +145,7 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 		return res, err
 	}
 
-	res.Status = 1
+	res.Status = 0
 	res.Msg = grpcres.Msg
 	return res, nil
 }

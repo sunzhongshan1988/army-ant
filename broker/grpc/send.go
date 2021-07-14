@@ -53,7 +53,7 @@ func StopTask(request *pb.StopTaskRequest) (*pb.StopTaskResponse, error) {
 	workerService := service.Worker{}
 
 	res := &pb.StopTaskResponse{
-		Status: 1,
+		Status: 0,
 		Msg:    "ok",
 	}
 

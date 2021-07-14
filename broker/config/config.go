@@ -1,67 +1,73 @@
 package config
 
 import (
+	"encoding/json"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	"go.mongodb.org/mongo-driver/bson"
+	"log"
+	"os"
 )
 
 type Broker struct {
-	label       string
-	brokerId    string
-	brokerType  string
-	address     string
-	grpcPort    string
-	graphqlPort string
+	Label       string `json:"label"`
+	BrokerId    string `json:"brokerId"`
+	BrokerType  string `json:"brokerType"`
+	Address     string `json:"address"`
+	GrpcPort    string `json:"grpcPort"`
+	GraphqlPort string `json:"graphqlPort"`
 }
 
 var broker = &Broker{}
 
 func Init() {
-	broker.label = "system"
-	broker.brokerId = ""
-	broker.brokerType = "main"
-	broker.address = "127.0.0.1"
-	broker.grpcPort = "50051"
-	broker.graphqlPort = "8080"
+	broker.Label = os.Getenv("AAB_LABEL") // "system"
+	broker.BrokerId = ""
+	broker.BrokerType = "main"
+	broker.Address = os.Getenv("AAB_ADDRESS")          // "127.0.0.1"
+	broker.GrpcPort = os.Getenv("AAB_GRPC_PORT")       // "50051"
+	broker.GraphqlPort = os.Getenv("AAB_GRAPHQL_PORT") // "8080"
 
 	registerBroker()
+
+	jsonStr, _ := json.Marshal(broker)
+	log.Printf("[config, init] info: %v", string(jsonStr))
 }
 
 func GetBrokerLabel() string {
-	return broker.label
+	return broker.Label
 }
 func SetBrokerLabel(lable string) {
-	broker.label = lable
+	broker.Label = lable
 }
 
 func GetBrokerId() string {
-	return broker.brokerId
+	return broker.BrokerId
 }
 func SetBrokerId(id string) {
-	broker.brokerId = id
+	broker.BrokerId = id
 }
 
 func GetBrokerType() string {
-	return broker.brokerType
+	return broker.BrokerType
 }
 
 func GetAddress() string {
-	return broker.address
+	return broker.Address
 }
 
 func GetGrpcPort() string {
-	return broker.grpcPort
+	return broker.GrpcPort
 }
 
 func GetGrpcLink() string {
-	return broker.address + ":" + broker.grpcPort
+	return broker.Address + ":" + broker.GrpcPort
 }
 
 func GetGraphQLPort() string {
-	return broker.graphqlPort
+	return broker.GraphqlPort
 }
 
 func registerBroker() {

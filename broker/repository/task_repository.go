@@ -49,7 +49,7 @@ func (r *TaskMongo) InsertOne(ctx context.Context, worker *model.Task) (*mongo.I
 
 func (r *TaskMongo) UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
 
-	updateResult, err := r.Client.Database("armyant").Collection("task").UpdateOne(ctx, data, filter)
+	updateResult, err := r.Client.Database("armyant").Collection("task").UpdateOne(ctx, filter, data)
 
 	if err != nil {
 		log.Printf("[mongodb,updateone] error:%v", err)
