@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
-	"github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
+	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	svr "github.com/sunzhongshan1988/army-ant/broker/server"
 	"log"
 	"sync"
@@ -13,8 +13,8 @@ func main() {
 	log.Printf("------------Broker Started!------------")
 
 	// Initialized mongo database
-	mongodb.Init()
-	client := mongodb.Client
+	mgdb.Init()
+	client := mgdb.Client
 	defer client.Disconnect(context.Background())
 
 	// Initialized config

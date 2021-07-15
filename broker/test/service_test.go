@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 	"encoding/json"
-	"github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
+	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	"go.mongodb.org/mongo-driver/bson"

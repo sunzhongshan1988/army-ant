@@ -1,4 +1,4 @@
-package mongodb
+package mgdb
 
 import (
 	"context"
@@ -11,9 +11,11 @@ import (
 
 var Client *mongo.Client
 
+var Database = "armyant_dev"
+
 func Init() *mongo.Client {
 
-	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/armyant?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
+	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/armyant_dev?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -32,7 +34,7 @@ func Init() *mongo.Client {
 	if err := Client.Ping(ctx, readpref.Primary()); err != nil {
 		panic(err)
 	}
-	log.Printf("[mongodb, init] info: Successfully connected and pinged.")
+	log.Printf("[mgdb, init] info: Successfully connected and pinged.")
 
 	return Client
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,13 +22,13 @@ type TaskResultMongo struct {
 
 func (r *TaskResultMongo) InsertOne(ctx context.Context, worker *model.TaskResult) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Client.Database("armyant").Collection("task_result").InsertOne(ctx, worker)
+	insertResult, err := r.Client.Database(mgdb.Database).Collection("task_result").InsertOne(ctx, worker)
 
 	if err != nil {
-		log.Printf("[mongodb,save] error:%v", err)
+		log.Printf("[mgdb,save] error:%v", err)
 	}
 
-	log.Printf("[mongodb,save] info: %v", insertResult.InsertedID)
+	log.Printf("[mgdb,save] info: %v", insertResult.InsertedID)
 
 	return insertResult, err
 }
@@ -44,16 +45,16 @@ func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *mode
 		findOptions.SetSkip(page.Index * page.Size)
 	}
 
-	cur, err := r.Client.Database("armyant").Collection("task_result").Find(context.TODO(), filter, findOptions)
+	cur, err := r.Client.Database(mgdb.Database).Collection("task_result").Find(context.TODO(), filter, findOptions)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
-		log.Printf("[error,mongodb] error:%v", err)
+		log.Printf("[error,mgdb] error:%v", err)
 	}
 
-	count, err1 := r.Client.Database("armyant").Collection("task_result").CountDocuments(ctx, filter)
+	count, err1 := r.Client.Database(mgdb.Database).Collection("task_result").CountDocuments(ctx, filter)
 	if err1 != nil {
-		log.Printf("[error,mongodb] error:%v", err)
+		log.Printf("[error,mgdb] error:%v", err)
 	}
 
 	result.TotalItems = count
@@ -62,10 +63,10 @@ func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *mode
 
 	defer cur.Close(ctx)
 	if err = cur.All(ctx, &result.Items); err != nil {
-		log.Printf("[mongodb, findall] error:%v", err)
+		log.Printf("[mgdb, findall] error:%v", err)
 	}
 
-	log.Printf("[mongodb, findall] info: %v", "success")
+	log.Printf("[mgdb, findall] info: %v", "success")
 
 	return &result, err
 }

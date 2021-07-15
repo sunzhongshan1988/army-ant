@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,12 +23,12 @@ type WorkerMongo struct {
 
 func (r *WorkerMongo) InsertOne(ctx context.Context, worker *model.Worker) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Client.Database("armyant").Collection("worker").InsertOne(ctx, worker)
+	insertResult, err := r.Client.Database(mgdb.Database).Collection("worker").InsertOne(ctx, worker)
 	if err != nil {
-		log.Printf("[mongodb,error]: %v", err)
+		log.Printf("[mgdb,error]: %v", err)
 	}
 
-	log.Printf("[mongodb,save]: %v", insertResult.InsertedID)
+	log.Printf("[mgdb,save]: %v", insertResult.InsertedID)
 
 	return insertResult, err
 }
@@ -36,7 +37,7 @@ func (r *WorkerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Worker
 
 	var result model.Worker
 
-	err := r.Client.Database("armyant").Collection("worker").FindOne(ctx, filter).Decode(&result)
+	err := r.Client.Database(mgdb.Database).Collection("worker").FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
@@ -59,14 +60,14 @@ func (r *WorkerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 		findOptions.SetSkip(page.Index * page.Size)
 	}
 
-	cur, err := r.Client.Database("armyant").Collection("worker").Find(context.TODO(), filter, findOptions)
+	cur, err := r.Client.Database(mgdb.Database).Collection("worker").Find(context.TODO(), filter, findOptions)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
 		log.Printf("[error,db]%v", err)
 	}
 
-	count, err1 := r.Client.Database("armyant").Collection("worker").CountDocuments(ctx, filter)
+	count, err1 := r.Client.Database(mgdb.Database).Collection("worker").CountDocuments(ctx, filter)
 	if err1 != nil {
 		log.Printf("[error,db]%v", err)
 	}

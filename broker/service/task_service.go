@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/sunzhongshan1988/army-ant/broker/database/mongodb"
+	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/repository"
 	"go.mongodb.org/mongo-driver/bson"
@@ -19,15 +19,15 @@ type Task struct {
 }
 
 func (s *Task) FindOne(filter bson.M) (*model.Task, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mongodb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
 	return taskRepo.FindOne(context.TODO(), filter)
 }
 
 func (s *Task) InsertOne(tr *model.Task) (*mongo.InsertOneResult, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mongodb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
 	return taskRepo.InsertOne(context.TODO(), tr)
 }
 func (s *Task) UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mongodb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
 	return taskRepo.UpdateOne(context.TODO(), filter, data)
 }
