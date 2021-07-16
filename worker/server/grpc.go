@@ -6,6 +6,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"github.com/sunzhongshan1988/army-ant/worker/config"
 	"github.com/sunzhongshan1988/army-ant/worker/cronmod"
+	"github.com/sunzhongshan1988/army-ant/worker/model"
 	pf "github.com/sunzhongshan1988/army-ant/worker/performer"
 	"google.golang.org/grpc"
 	"log"
@@ -21,15 +22,15 @@ type server struct {
 
 func Grpc() {
 	// Start server
-	log.Printf("--Start Server")
+	log.Printf("[system, grpc] info: Start gRPC Server")
 	lis, err := net.Listen("tcp", ":"+config.GetPort())
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("[system, grpc] error: failed to listen %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterGreeterServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("[system, grpc] error: failed to serve %v", err)
 	}
 }
 
@@ -42,10 +43,12 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 	jsonStr, _ := m.MarshalToString(in)
 	log.Printf("[grpc, task] info: %v", jsonStr)
 
-	input := pf.Input{
-		App:  in.Dna.Cmd.App,
-		Args: in.Dna.Cmd.Args,
-		Env:  in.Dna.Cmd.Env,
+	input := &model.Input{
+		TaskID:     in.TaskId,
+		InstanceID: in.InstanceId,
+		App:        in.Dna.Cmd.App,
+		Args:       in.Dna.Cmd.Args,
+		Env:        in.Dna.Cmd.Env,
 	}
 
 	res := &pb.TaskResponse{
@@ -56,9 +59,9 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 
 	switch in.Type {
 	case 0:
-		go pf.Standard(input)
+		go pf.Standard(*input)
 	case 1:
-		entryId, err := cronmod.AddFunc(in.Cron, func() { pf.Standard(input) })
+		entryId, err := cronmod.AddFunc(in.Cron, func() { pf.Standard(*input) })
 		if err != nil {
 			res.Status = 1
 			res.Msg = err.Error()

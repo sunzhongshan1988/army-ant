@@ -3,53 +3,56 @@ package performer
 import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/sunzhongshan1988/army-ant/worker/grpc"
+	"github.com/sunzhongshan1988/army-ant/worker/model"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 )
 
-type Input struct {
-	App  string
-	Args []string
-	Env  []string
-}
-
-func Standard(input Input) {
-	var out string
-	var status int32
-	startAt := ptypes.TimestampNow()
+func Standard(input model.Input) {
+	commandResult := &model.CommandResult{
+		TaskID:     input.TaskID,
+		InstanceID: input.InstanceID,
+		Out:        "",
+		Status:     0,
+		StartAt:    ptypes.TimestampNow(),
+		EndAt:      ptypes.TimestampNow(),
+	}
 
 	cmd := exec.Command(input.App, input.Args...)
 	cmd.Env = append(os.Environ(), input.Env...)
 
 	stdout, errSo := cmd.StdoutPipe()
 	if errSo != nil {
+		commandResult.Status = 1
 		log.Printf("[command,stdoutpipe] error: %s", errSo)
 	}
 
 	stderr, errSe := cmd.StderrPipe()
 	if errSe != nil {
+		commandResult.Status = 1
 		log.Printf("[command,stderrpipe] error: %s", errSe)
 	}
 
 	errStt := cmd.Start()
 	if errStt != nil {
 		b, _ := ioutil.ReadAll(stderr)
-		status = 1
-		out = string(b)
+		commandResult.Status = 1
+		commandResult.Out = string(b)
 		// stdoutReader.ReadRune()
 	} else {
 		b, _ := ioutil.ReadAll(stdout)
-		status = 0
-		out = string(b)
+		commandResult.Status = 0
+		commandResult.Out = string(b)
 	}
 
 	if errWt := cmd.Wait(); errWt != nil {
+		commandResult.Status = 1
 		log.Printf("[command,wait] error: %s", errWt)
 	}
 
-	log.Printf("[command,wait] info: %v", out)
+	log.Printf("[command,out] info: %v", commandResult.Out)
 
-	grpc.TaskResult(out, status, startAt, ptypes.TimestampNow())
+	grpc.TaskResult(commandResult)
 }

@@ -9,7 +9,6 @@ package grpc;
 
 import "google/protobuf/timestamp.proto";
 
-
 // The greeting service definition.
 service Greeter {
   // Broker server
@@ -48,6 +47,8 @@ message RegisterResponse {
 * Task Result
 */
 message TaskResultRequest {
+  string task_id = 6;
+  string instance_id = 7;
   string broker_id = 8;
   string worker_id = 10;
   int32 status = 11;
@@ -65,9 +66,10 @@ message TaskResultResponse {
 */
 
 message TaskRequest {
-  string id = 10;
+  string instance_id = 10;
+  string task_id = 11;
   int64 type = 12;
-  string cron = 11;
+  string cron = 13;
   string broker_id = 14;
   string worker_id = 16;
   DNA dna = 20;

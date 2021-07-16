@@ -8,6 +8,7 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"math/rand"
 	"strings"
@@ -35,29 +36,31 @@ func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInp
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.TaskResponse, error) {
 	jsonStr, _ := json.Marshal(task)
-	log.Printf("Received Task: %v", string(jsonStr))
+	log.Printf("[graphql, receivedtask] info: %v", string(jsonStr))
 
 	// Processing task DNA, mutation.
 	sDec, _ := b64.StdEncoding.DecodeString(task.Dna)
 	var m model.DNA
 	err := json.Unmarshal([]byte(sDec), &m)
 	if err != nil {
-		log.Printf("[error]DNA: %v", err)
+		log.Printf("[graphql, receivedtask] error: DNA %v", err)
 	}
 
 	mDec, _ := b64.StdEncoding.DecodeString(task.Mutation)
 	var mtt model.Mutation
 	err1 := json.Unmarshal([]byte(mDec), &mtt)
 	if err1 != nil {
-		log.Printf("[error]Mutation: %v", err)
+		log.Printf("[graphql, receivedtask] error: Mutation %v", err)
 	}
 
+	taskID := primitive.NewObjectID()
 	request := &pb.TaskRequest{
-		Id:       task.InstanceID,
-		Type:     task.Type,
-		Cron:     task.Cron,
-		BrokerId: config.GetBrokerId(),
-		WorkerId: task.WorkerID,
+		InstanceId: task.InstanceID,
+		TaskId:     taskID.Hex(),
+		Type:       task.Type,
+		Cron:       task.Cron,
+		BrokerId:   config.GetBrokerId(),
+		WorkerId:   task.WorkerID,
 		Dna: &pb.DNA{
 			Cmd: &pb.Command{
 				App:  m.Cmd.App,
@@ -72,7 +75,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	res := &model.TaskResponse{
 		Status: 0,
-		Msg:    "ok",
+		Msg:    taskID.Hex(),
 	}
 	if sendStatus == 1 {
 		res.Status = 1
@@ -81,6 +84,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 
 	if sendStatus == 0 {
 		taskDb := &model.Task{
+			ID:         taskID,
 			InstanceId: task.InstanceID,
 			BrokerId:   config.GetBrokerId(),
 			WorkerId:   task.WorkerID,

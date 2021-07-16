@@ -25,10 +25,10 @@ func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mon
 
 	insertResult, err := r.Client.Database(mgdb.Database).Collection("broker").InsertOne(ctx, broker)
 	if err != nil {
-		log.Printf("[mgdb,save] error:%v", err)
+		log.Printf("[mongodb, save] error:%v", err)
 	}
 
-	log.Printf("[mgdb,save] info: %v", insertResult.InsertedID)
+	log.Printf("[mongodb, save] info: %v", insertResult.InsertedID)
 
 	return insertResult, err
 }
@@ -41,10 +41,10 @@ func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb, findone] error: %v", err)
 	}
 
-	log.Printf("MongoDB FindOne: %v", "success")
+	log.Printf("[mongodb, findone] info: %v", "success")
 
 	return &result, err
 }
@@ -64,12 +64,12 @@ func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb, finall] error:%v", err)
 	}
 
 	count, err1 := r.Client.Database(mgdb.Database).Collection("broker").CountDocuments(ctx, filter)
 	if err1 != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb, finall] error:%v", err)
 	}
 
 	result.TotalItems = count
@@ -78,10 +78,10 @@ func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 
 	defer cur.Close(ctx)
 	if err = cur.All(ctx, &result.Items); err != nil {
-		log.Printf("[error,db]%v", err)
+		log.Printf("[mongodb, finall] error:%v", err)
 	}
 
-	log.Printf("MongoDB Find: %v", "success")
+	log.Printf("[mongodb, finall] info: %v", "success")
 
 	return &result, err
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -23,16 +24,16 @@ type server struct {
 
 func Grpc() {
 	// Start server
-	log.Printf("--Start Grpc Server")
+	log.Printf("[system, grpc] info: Start Grpc Server")
 
 	lis, err := net.Listen("tcp", ":"+config.GetGrpcPort())
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("[system, grpc] error: failed to listen %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterGreeterServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("[system, grpc] error: failed to serve %v", err)
 	}
 }
 
@@ -46,7 +47,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(in)
-	log.Printf("Worker Register: %v", jsonStr)
+	log.Printf("[grpc, workerregister] info: %v", jsonStr)
 
 	worker := &model.Worker{
 		BrokerId:    "",
@@ -91,15 +92,18 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 		OrigName:     true,
 	}
 	jsonStr, _ := m.MarshalToString(in)
-	log.Printf("Task Result: %v", jsonStr)
+	log.Printf("[grpc, taskresult] info: %v", jsonStr)
 
+	taskObjID, _ := primitive.ObjectIDFromHex(in.TaskId)
 	tr := &model.TaskResult{
-		BrokerId: in.BrokerId,
-		WorkerId: in.WorkerId,
-		Status:   in.Status,
-		Result:   in.Result,
-		StartAt:  in.StartAt,
-		EndAt:    in.EndAt,
+		TaskId:     taskObjID,
+		InstanceID: in.InstanceId,
+		BrokerId:   in.BrokerId,
+		WorkerId:   in.WorkerId,
+		Status:     in.Status,
+		Result:     in.Result,
+		StartAt:    in.StartAt,
+		EndAt:      in.EndAt,
 	}
 
 	// Save to
