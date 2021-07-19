@@ -23,6 +23,11 @@ func (s *Task) FindOne(filter bson.M) (*model.Task, error) {
 	return taskRepo.FindOne(context.TODO(), filter)
 }
 
+func (s *Task) FindAll(filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error) {
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	return taskRepo.FindAll(context.TODO(), filter, page)
+}
+
 func (s *Task) InsertOne(tr *model.Task) (*mongo.InsertOneResult, error) {
 	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
 	return taskRepo.InsertOne(context.TODO(), tr)

@@ -8,7 +8,6 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"math/rand"
 	"strings"
@@ -21,6 +20,7 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/service"
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInput) (*model.Character, error) {
@@ -196,6 +196,24 @@ func (r *queryResolver) GetWorkerItems(ctx context.Context, page *model.GetWorke
 	dbRes, _ := workerService.FindAll(bson.M{}, pg)
 
 	res := &model.WorkerPageResponse{
+		TotalPages:  dbRes.TotalPages,
+		TotalItems:  dbRes.TotalItems,
+		CurrentPage: dbRes.CurrentPage,
+		Items:       dbRes.Items,
+	}
+	return res, nil
+}
+
+func (r *queryResolver) GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error) {
+	taskService := service.Task{}
+
+	pg := &model.PageableRequest{
+		Index: page.Index,
+		Size:  page.Size,
+	}
+	dbRes, _ := taskService.FindAll(bson.M{}, pg)
+
+	res := &model.TaskPageResponse{
 		TotalPages:  dbRes.TotalPages,
 		TotalItems:  dbRes.TotalItems,
 		CurrentPage: dbRes.CurrentPage,

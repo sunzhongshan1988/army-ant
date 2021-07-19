@@ -14,6 +14,7 @@ type Query {
   search(name: String!): Character
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
+  getTaskItems(page: GetTaskItemsInput): TaskPageResponse
   getTaskResultItems(page: GetTaskResultItemsInput): TaskResultPageResponse
  }
 
@@ -74,6 +75,18 @@ type WorkerPageResponse {
   totalPages: Int!
   currentPage: Int!
   items: [WorkerScalar]
+}
+
+# Get Task
+input GetTaskItemsInput {
+  index: Int!
+  size: Int!
+}
+type TaskPageResponse {
+  totalItems: Int!
+  totalPages: Int!
+  currentPage: Int!
+  items: [TaskScalar]
 }
 
 # Get Task Result

@@ -20,6 +20,13 @@ type Task struct {
 	UpdateAt   *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`
 }
 
+type TaskItemsPage struct {
+	TotalItems  int64   `json:"totalItems"`
+	TotalPages  int64   `json:"totalPages"`
+	CurrentPage int64   `json:"currentItems"`
+	Items       []*Task `json:"items"`
+}
+
 type Command struct {
 	App  string   `json:"app"`
 	Args []string `json:"args"`
