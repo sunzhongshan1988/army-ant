@@ -41,9 +41,8 @@ type GetWorkerItemsInput struct {
 }
 
 type StopTaskInput struct {
-	InstanceID string `json:"instanceId"`
-	BrokerID   string `json:"brokerId"`
-	WorkerID   string `json:"workerId"`
+	TaskID   string `json:"taskId"`
+	BrokerID string `json:"brokerId"`
 }
 
 type StopTaskResponse struct {

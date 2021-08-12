@@ -9,7 +9,7 @@ var CronInstance *cron.Cron
 
 func Init() {
 	CronInstance = cron.New()
-	_, _ = CronInstance.AddFunc("*/10 * * * *",
+	_, _ = CronInstance.AddFunc("0 * * * *",
 		func() {
 			log.Printf("[cronmod, check] info: cronmod at working")
 		},

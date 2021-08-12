@@ -85,7 +85,13 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 // TaskResult implements WorkerRegister.GreeterServer
 func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.TaskResultResponse, error) {
 
-	var taskResultService = service.TaskResult{}
+	taskResultService := service.TaskResult{}
+	taskService := service.Task{}
+
+	res := &pb.TaskResultResponse{
+		Code: 0,
+		Msg:  "ok",
+	}
 
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -106,12 +112,19 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 		EndAt:      in.EndAt,
 	}
 
-	// Save to
-	_, _ = taskResultService.InsertOne(tr)
-
-	res := &pb.TaskResultResponse{
-		Code: 0,
-		Msg:  "ok",
+	// Save task result to DB
+	_, err := taskResultService.InsertOne(tr)
+	if err != nil {
+		res.Msg = "DB error"
 	}
+
+	// Update task status
+	filter1 := bson.M{"_id": taskObjID}
+	update := bson.M{"$set": bson.M{"status": 2}}
+	_, err2 := taskService.UpdateOne(filter1, update)
+	if err2 != nil {
+		res.Msg = "DB error"
+	}
+
 	return res, nil
 }

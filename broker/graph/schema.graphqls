@@ -103,9 +103,8 @@ type TaskResultPageResponse {
 
 # Stop Task
 input StopTaskInput {
-  instanceId: String!
+  taskId: String!
   brokerId: String!
-  workerId: String!
 }
 type StopTaskResponse {
   status: Int32!

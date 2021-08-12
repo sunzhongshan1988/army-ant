@@ -566,9 +566,8 @@ type TaskResultPageResponse {
 
 # Stop Task
 input StopTaskInput {
-  instanceId: String!
+  taskId: String!
   brokerId: String!
-  workerId: String!
 }
 type StopTaskResponse {
   status: Int32!
@@ -3214,11 +3213,11 @@ func (ec *executionContext) unmarshalInputStopTaskInput(ctx context.Context, obj
 
 	for k, v := range asMap {
 		switch k {
-		case "instanceId":
+		case "taskId":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instanceId"))
-			it.InstanceID, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskId"))
+			it.TaskID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3227,14 +3226,6 @@ func (ec *executionContext) unmarshalInputStopTaskInput(ctx context.Context, obj
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("brokerId"))
 			it.BrokerID, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "workerId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("workerId"))
-			it.WorkerID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

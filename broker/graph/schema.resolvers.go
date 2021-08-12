@@ -122,18 +122,22 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 	}
 
 	req := &pb.StopTaskRequest{
-		Id:       task.InstanceID,
+		Id:       task.TaskID,
 		BrokerId: task.BrokerID,
-		WorkerId: task.WorkerID,
+		WorkerId: "",
 		EntryId:  0,
 	}
+
+	taskObjID, _ := primitive.ObjectIDFromHex(task.TaskID)
+	filter := bson.M{"_id": taskObjID, "status": 0}
+
 	taskService := service.Task{}
-	filter := bson.M{"instance_id": task.InstanceID, "worker_id": task.WorkerID, "status": 0}
 	dbtask, err := taskService.FindOne(filter)
 	if err != nil {
 		res.Msg = "query db error"
 		return res, err
 	}
+	req.WorkerId = dbtask.WorkerId
 	req.EntryId = dbtask.EntryId
 	grpcres, err1 := grpc.StopTask(req)
 	if err1 != nil {
