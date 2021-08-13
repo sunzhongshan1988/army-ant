@@ -41,6 +41,7 @@ func Grpc() {
 func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 
 	workerService := service.Worker{}
+	taskService := service.Task{}
 
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -65,6 +66,12 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	if r != nil {
 		worker.BrokerId = r.BrokerId
 		worker.WorkerId = r.WorkerId
+
+		// Update task status
+		filter1 := bson.M{"worker_id": r.WorkerId, "status": 2}
+		update := bson.M{"$set": bson.M{"status": 3}}
+		_, _ = taskService.UpdateOne(filter1, update)
+
 	} else {
 		worker.BrokerId = config.GetBrokerId()
 		worker.WorkerId = uuid.New().String()

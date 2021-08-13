@@ -90,7 +90,7 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 			WorkerId:   task.WorkerID,
 			EntryId:    entryId,
 			Type:       task.Type,
-			Status:     sendStatus,
+			Status:     1,
 			Cron:       task.Cron,
 			DNA:        task.Dna,
 			Mutation:   task.Mutation,
