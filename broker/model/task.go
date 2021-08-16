@@ -5,7 +5,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Task Status 0 - null, 1 - running, 2 - finish, 3 - suspend
+// Task Status 	0 - null, 1 - running, 2 - finish, 3 - suspend
+// Task Type 	0 - manual, 1 - crontab
 type Task struct {
 	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	InstanceId string                 `bson:"instance_id,omitempty" json:"instanceId"`

@@ -7,6 +7,7 @@ import (
 type Input struct {
 	TaskID     string
 	InstanceID string
+	Type       int64
 	App        string
 	Args       []string
 	Env        []string
@@ -16,6 +17,7 @@ type CommandResult struct {
 	TaskID     string
 	InstanceID string
 	Out        string
+	Type       int64
 	Status     int32
 	StartAt    *timestamp.Timestamp
 	EndAt      *timestamp.Timestamp

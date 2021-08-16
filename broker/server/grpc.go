@@ -113,6 +113,7 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 		InstanceID: in.InstanceId,
 		BrokerId:   in.BrokerId,
 		WorkerId:   in.WorkerId,
+		Type:       in.Type,
 		Status:     in.Status,
 		Result:     in.Result,
 		StartAt:    in.StartAt,
@@ -126,11 +127,13 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 	}
 
 	// Update task status
-	filter1 := bson.M{"_id": taskObjID}
-	update := bson.M{"$set": bson.M{"status": 2}}
-	_, err2 := taskService.UpdateOne(filter1, update)
-	if err2 != nil {
-		res.Msg = "DB error"
+	if in.Type == 0 {
+		filter1 := bson.M{"_id": taskObjID}
+		update := bson.M{"$set": bson.M{"status": 2}}
+		_, err2 := taskService.UpdateOne(filter1, update)
+		if err2 != nil {
+			res.Msg = "DB error"
+		}
 	}
 
 	return res, nil

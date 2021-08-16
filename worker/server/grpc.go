@@ -34,7 +34,7 @@ func Grpc() {
 	}
 }
 
-// SendTask implements SendTask.GreeterServer
+// Task SendTask implements SendTask.GreeterServer
 func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse, error) {
 	m := jsonpb.Marshaler{
 		EmitDefaults: true,
@@ -46,6 +46,7 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 	input := &model.Input{
 		TaskID:     in.TaskId,
 		InstanceID: in.InstanceId,
+		Type:       in.Type,
 		App:        in.Dna.Cmd.App,
 		Args:       in.Dna.Cmd.Args,
 		Env:        in.Dna.Cmd.Env,

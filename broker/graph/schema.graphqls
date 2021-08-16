@@ -21,11 +21,17 @@ type Query {
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
-  receive_task(task: TaskInput): TaskResponse!
-  stopTask(task: StopTaskInput): StopTaskResponse!
+  receive_task(task: TaskInput): StdResponse!
+  stopTask(task: TaskInstanceInput): StdResponse!
+  retryTask(task: TaskInstanceInput): StdResponse!
 }
 
 # just a input type for our mutation
+type StdResponse {
+  status: Int!
+  msg: String!
+}
+
 input CharacterInput {
   name: String!
   likes: Int!
@@ -47,10 +53,6 @@ input TaskInput {
   cron: String!
   dna: String!
   mutation: String!
-}
-type TaskResponse {
-  status: Int!
-  msg: String!
 }
 
 # Get broker items
@@ -101,15 +103,12 @@ type TaskResultPageResponse {
   items: [TaskResultScalar]
 }
 
-# Stop Task
-input StopTaskInput {
+# Stop, Retry Task
+input TaskInstanceInput {
   taskId: String!
   brokerId: String!
 }
-type StopTaskResponse {
-  status: Int32!
-  msg: String!
-}
+
 
 scalar Int32
 scalar BrokerScalar

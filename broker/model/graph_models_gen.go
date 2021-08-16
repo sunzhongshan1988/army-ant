@@ -40,13 +40,8 @@ type GetWorkerItemsInput struct {
 	Size  int64 `json:"size"`
 }
 
-type StopTaskInput struct {
-	TaskID   string `json:"taskId"`
-	BrokerID string `json:"brokerId"`
-}
-
-type StopTaskResponse struct {
-	Status int32  `json:"status"`
+type StdResponse struct {
+	Status int64  `json:"status"`
 	Msg    string `json:"msg"`
 }
 
@@ -60,16 +55,16 @@ type TaskInput struct {
 	Mutation   string `json:"mutation"`
 }
 
+type TaskInstanceInput struct {
+	TaskID   string `json:"taskId"`
+	BrokerID string `json:"brokerId"`
+}
+
 type TaskPageResponse struct {
 	TotalItems  int64   `json:"totalItems"`
 	TotalPages  int64   `json:"totalPages"`
 	CurrentPage int64   `json:"currentPage"`
 	Items       []*Task `json:"items"`
-}
-
-type TaskResponse struct {
-	Status int64  `json:"status"`
-	Msg    string `json:"msg"`
 }
 
 type TaskResultPageResponse struct {

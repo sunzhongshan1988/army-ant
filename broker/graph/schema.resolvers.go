@@ -34,7 +34,7 @@ func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInp
 	return charac, nil
 }
 
-func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.TaskResponse, error) {
+func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error) {
 	jsonStr, _ := json.Marshal(task)
 	log.Printf("[graphql, receivedtask] info: %v", string(jsonStr))
 
@@ -71,18 +71,18 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 		},
 	}
 
-	entryId, sendStatus := grpc.SendTask(request, task.WorkerID)
+	entryId, err3 := grpc.SendTask(request, task.WorkerID)
 
-	res := &model.TaskResponse{
+	res := &model.StdResponse{
 		Status: 0,
 		Msg:    taskID.Hex(),
 	}
-	if sendStatus == 1 {
+	if err3 != nil {
 		res.Status = 1
 		res.Msg = "send task to worker error"
 	}
 
-	if sendStatus == 0 {
+	if err3 == nil {
 		taskDb := &model.Task{
 			ID:         taskID,
 			InstanceId: task.InstanceID,
@@ -112,11 +112,11 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	return res, nil
 }
 
-func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInput) (*model.StopTaskResponse, error) {
+func (r *mutationResolver) StopTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error) {
 	jsonStr, _ := json.Marshal(task)
 	log.Printf("[graphql, stoptask] info: %v", string(jsonStr))
 
-	res := &model.StopTaskResponse{
+	res := &model.StdResponse{
 		Status: 1,
 		Msg:    "error",
 	}
@@ -129,8 +129,7 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 	}
 
 	taskObjID, _ := primitive.ObjectIDFromHex(task.TaskID)
-	filter := bson.M{"_id": taskObjID, "status": 0}
-
+	filter := bson.M{"_id": taskObjID, "status": 1}
 	taskService := service.Task{}
 	dbtask, err := taskService.FindOne(filter)
 	if err != nil {
@@ -146,7 +145,7 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 	}
 
 	filter1 := bson.M{"_id": dbtask.ID}
-	update := bson.M{"$set": bson.M{"status": 1}}
+	update := bson.M{"$set": bson.M{"status": 2}}
 	_, err2 := taskService.UpdateOne(filter1, update)
 	if err2 != nil {
 		res.Msg = "update db error"
@@ -155,6 +154,80 @@ func (r *mutationResolver) StopTask(ctx context.Context, task *model.StopTaskInp
 
 	res.Status = 0
 	res.Msg = grpcres.Msg
+	return res, nil
+}
+
+func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error) {
+	jsonStr, _ := json.Marshal(task)
+	log.Printf("[graphql, retrytask] info: %v", string(jsonStr))
+
+	res := &model.StdResponse{
+		Status: 1,
+		Msg:    "error",
+	}
+
+	taskObjID, _ := primitive.ObjectIDFromHex(task.TaskID)
+	filter := bson.M{"_id": taskObjID}
+	taskService := service.Task{}
+	dbTask, err2 := taskService.FindOne(filter)
+	if err2 != nil {
+		res.Msg = "query db error"
+		return res, err2
+	}
+
+	if dbTask.Status == 1 {
+		res.Msg = "wait task finish"
+		return res, err2
+	}
+
+	// Processing task DNA, mutation.
+	sDec, _ := b64.StdEncoding.DecodeString(dbTask.DNA)
+	var m model.DNA
+	err := json.Unmarshal([]byte(sDec), &m)
+	if err != nil {
+		log.Printf("[graphql, retrytask] error: DNA %v", err)
+	}
+
+	mDec, _ := b64.StdEncoding.DecodeString(dbTask.Mutation)
+	var mtt model.Mutation
+	err1 := json.Unmarshal([]byte(mDec), &mtt)
+	if err1 != nil {
+		log.Printf("[graphql, retrytask] error: Mutation %v", err)
+	}
+
+	req := &pb.TaskRequest{
+		InstanceId: dbTask.InstanceId,
+		TaskId:     dbTask.ID.Hex(),
+		Type:       dbTask.Type,
+		Cron:       dbTask.Cron,
+		BrokerId:   dbTask.BrokerId,
+		WorkerId:   dbTask.WorkerId,
+		Dna: &pb.DNA{
+			Cmd: &pb.Command{
+				App:  m.Cmd.App,
+				Args: mtt.Cmd.Args,
+				Env:  mtt.Cmd.Env,
+			},
+			Version: mtt.Version,
+		},
+	}
+
+	entryId, err3 := grpc.SendTask(req, dbTask.WorkerId)
+	if err3 != nil {
+		res.Msg = "update db error"
+		return res, err3
+	}
+
+	filter1 := bson.M{"_id": dbTask.ID}
+	update := bson.M{"$set": bson.M{"status": 1, "entry_id": entryId}}
+	_, err2 = taskService.UpdateOne(filter1, update)
+	if err2 != nil {
+		res.Msg = "update db error"
+		return res, err2
+	}
+
+	res.Status = 0
+	res.Msg = "ok"
 	return res, nil
 }
 

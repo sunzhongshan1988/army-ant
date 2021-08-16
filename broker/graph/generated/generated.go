@@ -60,7 +60,8 @@ type ComplexityRoot struct {
 	Mutation struct {
 		Add         func(childComplexity int, character model.CharacterInput) int
 		ReceiveTask func(childComplexity int, task *model.TaskInput) int
-		StopTask    func(childComplexity int, task *model.StopTaskInput) int
+		RetryTask   func(childComplexity int, task *model.TaskInstanceInput) int
+		StopTask    func(childComplexity int, task *model.TaskInstanceInput) int
 	}
 
 	Query struct {
@@ -72,7 +73,7 @@ type ComplexityRoot struct {
 		Search             func(childComplexity int, name string) int
 	}
 
-	StopTaskResponse struct {
+	StdResponse struct {
 		Msg    func(childComplexity int) int
 		Status func(childComplexity int) int
 	}
@@ -82,11 +83,6 @@ type ComplexityRoot struct {
 		Items       func(childComplexity int) int
 		TotalItems  func(childComplexity int) int
 		TotalPages  func(childComplexity int) int
-	}
-
-	TaskResponse struct {
-		Msg    func(childComplexity int) int
-		Status func(childComplexity int) int
 	}
 
 	TaskResultPageResponse struct {
@@ -106,8 +102,9 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	Add(ctx context.Context, character model.CharacterInput) (*model.Character, error)
-	ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.TaskResponse, error)
-	StopTask(ctx context.Context, task *model.StopTaskInput) (*model.StopTaskResponse, error)
+	ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error)
+	StopTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
+	RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 }
 type QueryResolver interface {
 	Characters(ctx context.Context) ([]*model.Character, error)
@@ -206,6 +203,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ReceiveTask(childComplexity, args["task"].(*model.TaskInput)), true
 
+	case "Mutation.retryTask":
+		if e.complexity.Mutation.RetryTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_retryTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RetryTask(childComplexity, args["task"].(*model.TaskInstanceInput)), true
+
 	case "Mutation.stopTask":
 		if e.complexity.Mutation.StopTask == nil {
 			break
@@ -216,7 +225,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.StopTask(childComplexity, args["task"].(*model.StopTaskInput)), true
+		return e.complexity.Mutation.StopTask(childComplexity, args["task"].(*model.TaskInstanceInput)), true
 
 	case "Query.characters":
 		if e.complexity.Query.Characters == nil {
@@ -285,19 +294,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Search(childComplexity, args["name"].(string)), true
 
-	case "StopTaskResponse.msg":
-		if e.complexity.StopTaskResponse.Msg == nil {
+	case "StdResponse.msg":
+		if e.complexity.StdResponse.Msg == nil {
 			break
 		}
 
-		return e.complexity.StopTaskResponse.Msg(childComplexity), true
+		return e.complexity.StdResponse.Msg(childComplexity), true
 
-	case "StopTaskResponse.status":
-		if e.complexity.StopTaskResponse.Status == nil {
+	case "StdResponse.status":
+		if e.complexity.StdResponse.Status == nil {
 			break
 		}
 
-		return e.complexity.StopTaskResponse.Status(childComplexity), true
+		return e.complexity.StdResponse.Status(childComplexity), true
 
 	case "TaskPageResponse.currentPage":
 		if e.complexity.TaskPageResponse.CurrentPage == nil {
@@ -326,20 +335,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TaskPageResponse.TotalPages(childComplexity), true
-
-	case "TaskResponse.msg":
-		if e.complexity.TaskResponse.Msg == nil {
-			break
-		}
-
-		return e.complexity.TaskResponse.Msg(childComplexity), true
-
-	case "TaskResponse.status":
-		if e.complexity.TaskResponse.Status == nil {
-			break
-		}
-
-		return e.complexity.TaskResponse.Status(childComplexity), true
 
 	case "TaskResultPageResponse.currentPage":
 		if e.complexity.TaskResultPageResponse.CurrentPage == nil {
@@ -484,11 +479,17 @@ type Query {
 # This is a mutation we will be doing
 type Mutation {
   add(character: CharacterInput!): Character!
-  receive_task(task: TaskInput): TaskResponse!
-  stopTask(task: StopTaskInput): StopTaskResponse!
+  receive_task(task: TaskInput): StdResponse!
+  stopTask(task: TaskInstanceInput): StdResponse!
+  retryTask(task: TaskInstanceInput): StdResponse!
 }
 
 # just a input type for our mutation
+type StdResponse {
+  status: Int!
+  msg: String!
+}
+
 input CharacterInput {
   name: String!
   likes: Int!
@@ -510,10 +511,6 @@ input TaskInput {
   cron: String!
   dna: String!
   mutation: String!
-}
-type TaskResponse {
-  status: Int!
-  msg: String!
 }
 
 # Get broker items
@@ -564,15 +561,12 @@ type TaskResultPageResponse {
   items: [TaskResultScalar]
 }
 
-# Stop Task
-input StopTaskInput {
+# Stop, Retry Task
+input TaskInstanceInput {
   taskId: String!
   brokerId: String!
 }
-type StopTaskResponse {
-  status: Int32!
-  msg: String!
-}
+
 
 scalar Int32
 scalar BrokerScalar
@@ -617,13 +611,28 @@ func (ec *executionContext) field_Mutation_receive_task_args(ctx context.Context
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_retryTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.TaskInstanceInput
+	if tmp, ok := rawArgs["task"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("task"))
+		arg0, err = ec.unmarshalOTaskInstanceInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInstanceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["task"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_stopTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.StopTaskInput
+	var arg0 *model.TaskInstanceInput
 	if tmp, ok := rawArgs["task"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("task"))
-		arg0, err = ec.unmarshalOStopTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStopTaskInput(ctx, tmp)
+		arg0, err = ec.unmarshalOTaskInstanceInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInstanceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1081,9 +1090,9 @@ func (ec *executionContext) _Mutation_receive_task(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.TaskResponse)
+	res := resTmp.(*model.StdResponse)
 	fc.Result = res
-	return ec.marshalNTaskResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResponse(ctx, field.Selections, res)
+	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_stopTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1111,7 +1120,7 @@ func (ec *executionContext) _Mutation_stopTask(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().StopTask(rctx, args["task"].(*model.StopTaskInput))
+		return ec.resolvers.Mutation().StopTask(rctx, args["task"].(*model.TaskInstanceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1123,9 +1132,51 @@ func (ec *executionContext) _Mutation_stopTask(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.StopTaskResponse)
+	res := resTmp.(*model.StdResponse)
 	fc.Result = res
-	return ec.marshalNStopTaskResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStopTaskResponse(ctx, field.Selections, res)
+	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_retryTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_retryTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RetryTask(rctx, args["task"].(*model.TaskInstanceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.StdResponse)
+	fc.Result = res
+	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_characters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1429,7 +1480,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _StopTaskResponse_status(ctx context.Context, field graphql.CollectedField, obj *model.StopTaskResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _StdResponse_status(ctx context.Context, field graphql.CollectedField, obj *model.StdResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1437,7 +1488,7 @@ func (ec *executionContext) _StopTaskResponse_status(ctx context.Context, field 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "StopTaskResponse",
+		Object:     "StdResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1459,12 +1510,12 @@ func (ec *executionContext) _StopTaskResponse_status(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int64)
 	fc.Result = res
-	return ec.marshalNInt322int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _StopTaskResponse_msg(ctx context.Context, field graphql.CollectedField, obj *model.StopTaskResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _StdResponse_msg(ctx context.Context, field graphql.CollectedField, obj *model.StdResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1472,7 +1523,7 @@ func (ec *executionContext) _StopTaskResponse_msg(ctx context.Context, field gra
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "StopTaskResponse",
+		Object:     "StdResponse",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1634,76 +1685,6 @@ func (ec *executionContext) _TaskPageResponse_items(ctx context.Context, field g
 	res := resTmp.([]*model.Task)
 	fc.Result = res
 	return ec.marshalOTaskScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTask(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _TaskResponse_status(ctx context.Context, field graphql.CollectedField, obj *model.TaskResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "TaskResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Status, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _TaskResponse_msg(ctx context.Context, field graphql.CollectedField, obj *model.TaskResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "TaskResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Msg, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskResultPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
@@ -3207,34 +3188,6 @@ func (ec *executionContext) unmarshalInputGetWorkerItemsInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputStopTaskInput(ctx context.Context, obj interface{}) (model.StopTaskInput, error) {
-	var it model.StopTaskInput
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "taskId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskId"))
-			it.TaskID, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "brokerId":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("brokerId"))
-			it.BrokerID, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj interface{}) (model.TaskInput, error) {
 	var it model.TaskInput
 	var asMap = obj.(map[string]interface{})
@@ -3294,6 +3247,34 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mutation"))
 			it.Mutation, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTaskInstanceInput(ctx context.Context, obj interface{}) (model.TaskInstanceInput, error) {
+	var it model.TaskInstanceInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "taskId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskId"))
+			it.TaskID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "brokerId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("brokerId"))
+			it.BrokerID, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3417,6 +3398,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "retryTask":
+			out.Values[i] = ec._Mutation_retryTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3527,24 +3513,24 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var stopTaskResponseImplementors = []string{"StopTaskResponse"}
+var stdResponseImplementors = []string{"StdResponse"}
 
-func (ec *executionContext) _StopTaskResponse(ctx context.Context, sel ast.SelectionSet, obj *model.StopTaskResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, stopTaskResponseImplementors)
+func (ec *executionContext) _StdResponse(ctx context.Context, sel ast.SelectionSet, obj *model.StdResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stdResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("StopTaskResponse")
+			out.Values[i] = graphql.MarshalString("StdResponse")
 		case "status":
-			out.Values[i] = ec._StopTaskResponse_status(ctx, field, obj)
+			out.Values[i] = ec._StdResponse_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "msg":
-			out.Values[i] = ec._StopTaskResponse_msg(ctx, field, obj)
+			out.Values[i] = ec._StdResponse_msg(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3587,38 +3573,6 @@ func (ec *executionContext) _TaskPageResponse(ctx context.Context, sel ast.Selec
 			}
 		case "items":
 			out.Values[i] = ec._TaskPageResponse_items(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var taskResponseImplementors = []string{"TaskResponse"}
-
-func (ec *executionContext) _TaskResponse(ctx context.Context, sel ast.SelectionSet, obj *model.TaskResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, taskResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("TaskResponse")
-		case "status":
-			out.Values[i] = ec._TaskResponse_status(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "msg":
-			out.Values[i] = ec._TaskResponse_msg(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4054,33 +4008,18 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt322int32(ctx context.Context, v interface{}) (int32, error) {
-	res, err := graphql.UnmarshalInt32(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) marshalNStdResponse2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx context.Context, sel ast.SelectionSet, v model.StdResponse) graphql.Marshaler {
+	return ec._StdResponse(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInt322int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
-	res := graphql.MarshalInt32(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNStopTaskResponse2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStopTaskResponse(ctx context.Context, sel ast.SelectionSet, v model.StopTaskResponse) graphql.Marshaler {
-	return ec._StopTaskResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNStopTaskResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStopTaskResponse(ctx context.Context, sel ast.SelectionSet, v *model.StopTaskResponse) graphql.Marshaler {
+func (ec *executionContext) marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx context.Context, sel ast.SelectionSet, v *model.StdResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._StopTaskResponse(ctx, sel, v)
+	return ec._StdResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4096,20 +4035,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNTaskResponse2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResponse(ctx context.Context, sel ast.SelectionSet, v model.TaskResponse) graphql.Marshaler {
-	return ec._TaskResponse(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNTaskResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResponse(ctx context.Context, sel ast.SelectionSet, v *model.TaskResponse) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._TaskResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -4462,14 +4387,6 @@ func (ec *executionContext) unmarshalOGetWorkerItemsInput2ᚖgithubᚗcomᚋsunz
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOStopTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStopTaskInput(ctx context.Context, v interface{}) (*model.StopTaskInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputStopTaskInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4499,6 +4416,14 @@ func (ec *executionContext) unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan19
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputTaskInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOTaskInstanceInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInstanceInput(ctx context.Context, v interface{}) (*model.TaskInstanceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTaskInstanceInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

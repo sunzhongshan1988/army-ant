@@ -15,9 +15,10 @@ func Standard(input model.Input) {
 		TaskID:     input.TaskID,
 		InstanceID: input.InstanceID,
 		Out:        "",
+		Type:       input.Type,
 		Status:     0,
 		StartAt:    ptypes.TimestampNow(),
-		EndAt:      ptypes.TimestampNow(),
+		EndAt:      nil,
 	}
 
 	cmd := exec.Command(input.App, input.Args...)
@@ -54,5 +55,6 @@ func Standard(input model.Input) {
 
 	log.Printf("[command,out] info: %v", commandResult.Out)
 
+	commandResult.EndAt = ptypes.TimestampNow()
 	grpc.TaskResult(commandResult)
 }
