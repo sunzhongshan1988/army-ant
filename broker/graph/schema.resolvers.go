@@ -9,8 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
-	"strings"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
@@ -22,17 +20,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-func (r *mutationResolver) Add(ctx context.Context, character model.CharacterInput) (*model.Character, error) {
-	charac := &model.Character{
-		ID:    fmt.Sprintf("T%d", rand.Int()),
-		Name:  character.Name,
-		Likes: character.Likes,
-	}
-
-	r.characters = append(r.characters, charac)
-	return charac, nil
-}
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error) {
 	jsonStr, _ := json.Marshal(task)
@@ -231,18 +218,8 @@ func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstan
 	return res, nil
 }
 
-func (r *queryResolver) Characters(ctx context.Context) ([]*model.Character, error) {
-	return r.characters, nil
-}
-
-func (r *queryResolver) Search(ctx context.Context, name string) (*model.Character, error) {
-	charName := strings.ToLower(name)
-	for _, x := range r.characters {
-		if strings.Contains(strings.ToLower(x.Name), charName) {
-			return x, nil
-		}
-	}
-	return nil, nil
+func (r *queryResolver) GetSystemStatus(ctx context.Context) (*model.SystemStatusResponse, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error) {

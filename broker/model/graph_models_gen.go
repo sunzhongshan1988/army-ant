@@ -9,17 +9,6 @@ type BrokerPageResponse struct {
 	Items       []*Broker `json:"items"`
 }
 
-type Character struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Likes int64  `json:"likes"`
-}
-
-type CharacterInput struct {
-	Name  string `json:"name"`
-	Likes int64  `json:"likes"`
-}
-
 type GetBrokerItemsInput struct {
 	Index int64 `json:"index"`
 	Size  int64 `json:"size"`
@@ -43,6 +32,13 @@ type GetWorkerItemsInput struct {
 type StdResponse struct {
 	Status int64  `json:"status"`
 	Msg    string `json:"msg"`
+}
+
+type SystemStatusResponse struct {
+	Broker     []*int64 `json:"broker"`
+	Worker     []*int64 `json:"worker"`
+	Task       []*int64 `json:"task"`
+	TaskResult []*int64 `json:"taskResult"`
 }
 
 type TaskInput struct {
