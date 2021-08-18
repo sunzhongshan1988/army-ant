@@ -8,7 +8,6 @@ import (
 	"errors"
 	"strconv"
 	"sync"
-	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -51,31 +50,30 @@ type ComplexityRoot struct {
 		TotalPages  func(childComplexity int) int
 	}
 
-	Character struct {
-		ID    func(childComplexity int) int
-		Likes func(childComplexity int) int
-		Name  func(childComplexity int) int
-	}
-
 	Mutation struct {
-		Add         func(childComplexity int, character model.CharacterInput) int
 		ReceiveTask func(childComplexity int, task *model.TaskInput) int
 		RetryTask   func(childComplexity int, task *model.TaskInstanceInput) int
 		StopTask    func(childComplexity int, task *model.TaskInstanceInput) int
 	}
 
 	Query struct {
-		Characters         func(childComplexity int) int
 		GetBrokerItems     func(childComplexity int, page *model.GetBrokerItemsInput) int
+		GetSystemStatus    func(childComplexity int) int
 		GetTaskItems       func(childComplexity int, page *model.GetTaskItemsInput) int
 		GetTaskResultItems func(childComplexity int, page *model.GetTaskResultItemsInput) int
 		GetWorkerItems     func(childComplexity int, page *model.GetWorkerItemsInput) int
-		Search             func(childComplexity int, name string) int
 	}
 
 	StdResponse struct {
 		Msg    func(childComplexity int) int
 		Status func(childComplexity int) int
+	}
+
+	SystemStatusResponse struct {
+		Broker     func(childComplexity int) int
+		Task       func(childComplexity int) int
+		TaskResult func(childComplexity int) int
+		Worker     func(childComplexity int) int
 	}
 
 	TaskPageResponse struct {
@@ -101,14 +99,12 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Add(ctx context.Context, character model.CharacterInput) (*model.Character, error)
 	ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error)
 	StopTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 	RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 }
 type QueryResolver interface {
-	Characters(ctx context.Context) ([]*model.Character, error)
-	Search(ctx context.Context, name string) (*model.Character, error)
+	GetSystemStatus(ctx context.Context) (*model.SystemStatusResponse, error)
 	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error)
 	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 	GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error)
@@ -158,39 +154,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BrokerPageResponse.TotalPages(childComplexity), true
 
-	case "Character.id":
-		if e.complexity.Character.ID == nil {
-			break
-		}
-
-		return e.complexity.Character.ID(childComplexity), true
-
-	case "Character.likes":
-		if e.complexity.Character.Likes == nil {
-			break
-		}
-
-		return e.complexity.Character.Likes(childComplexity), true
-
-	case "Character.name":
-		if e.complexity.Character.Name == nil {
-			break
-		}
-
-		return e.complexity.Character.Name(childComplexity), true
-
-	case "Mutation.add":
-		if e.complexity.Mutation.Add == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_add_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Add(childComplexity, args["character"].(model.CharacterInput)), true
-
 	case "Mutation.receive_task":
 		if e.complexity.Mutation.ReceiveTask == nil {
 			break
@@ -227,13 +190,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StopTask(childComplexity, args["task"].(*model.TaskInstanceInput)), true
 
-	case "Query.characters":
-		if e.complexity.Query.Characters == nil {
-			break
-		}
-
-		return e.complexity.Query.Characters(childComplexity), true
-
 	case "Query.getBrokerItems":
 		if e.complexity.Query.GetBrokerItems == nil {
 			break
@@ -245,6 +201,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetBrokerItems(childComplexity, args["page"].(*model.GetBrokerItemsInput)), true
+
+	case "Query.getSystemStatus":
+		if e.complexity.Query.GetSystemStatus == nil {
+			break
+		}
+
+		return e.complexity.Query.GetSystemStatus(childComplexity), true
 
 	case "Query.getTaskItems":
 		if e.complexity.Query.GetTaskItems == nil {
@@ -282,18 +245,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetWorkerItems(childComplexity, args["page"].(*model.GetWorkerItemsInput)), true
 
-	case "Query.search":
-		if e.complexity.Query.Search == nil {
-			break
-		}
-
-		args, err := ec.field_Query_search_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Search(childComplexity, args["name"].(string)), true
-
 	case "StdResponse.msg":
 		if e.complexity.StdResponse.Msg == nil {
 			break
@@ -307,6 +258,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.StdResponse.Status(childComplexity), true
+
+	case "SystemStatusResponse.broker":
+		if e.complexity.SystemStatusResponse.Broker == nil {
+			break
+		}
+
+		return e.complexity.SystemStatusResponse.Broker(childComplexity), true
+
+	case "SystemStatusResponse.task":
+		if e.complexity.SystemStatusResponse.Task == nil {
+			break
+		}
+
+		return e.complexity.SystemStatusResponse.Task(childComplexity), true
+
+	case "SystemStatusResponse.taskResult":
+		if e.complexity.SystemStatusResponse.TaskResult == nil {
+			break
+		}
+
+		return e.complexity.SystemStatusResponse.TaskResult(childComplexity), true
+
+	case "SystemStatusResponse.worker":
+		if e.complexity.SystemStatusResponse.Worker == nil {
+			break
+		}
+
+		return e.complexity.SystemStatusResponse.Worker(childComplexity), true
 
 	case "TaskPageResponse.currentPage":
 		if e.complexity.TaskPageResponse.CurrentPage == nil {
@@ -468,8 +447,7 @@ schema {
 
 # These are the two queries we will be doing
 type Query {
-  characters: [Character!]!
-  search(name: String!): Character
+  getSystemStatus: SystemStatusResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
@@ -478,7 +456,6 @@ type Query {
 
 # This is a mutation we will be doing
 type Mutation {
-  add(character: CharacterInput!): Character!
   receive_task(task: TaskInput): StdResponse!
   stopTask(task: TaskInstanceInput): StdResponse!
   retryTask(task: TaskInstanceInput): StdResponse!
@@ -490,28 +467,13 @@ type StdResponse {
   msg: String!
 }
 
-input CharacterInput {
-  name: String!
-  likes: Int!
-}
-
-# character schema
-type Character {
-  id: ID!
-  name: String!
-  likes: Int!
-}
-
-# receive a task
-input TaskInput {
-  instanceId: String!
-  brokerId: String!
-  workerId: String!
-  type: Int!
-  cron: String!
-  dna: String!
-  mutation: String!
-}
+# Get system status
+type SystemStatusResponse {
+  broker: [Int]!
+  worker: [Int]!
+  task:   [Int]!
+  taskResult: [Int]!
+ }
 
 # Get broker items
 input GetBrokerItemsInput {
@@ -561,6 +523,17 @@ type TaskResultPageResponse {
   items: [TaskResultScalar]
 }
 
+# receive a task
+input TaskInput {
+  instanceId: String!
+  brokerId: String!
+  workerId: String!
+  type: Int!
+  cron: String!
+  dna: String!
+  mutation: String!
+}
+
 # Stop, Retry Task
 input TaskInstanceInput {
   taskId: String!
@@ -580,21 +553,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_add_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.CharacterInput
-	if tmp, ok := rawArgs["character"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("character"))
-		arg0, err = ec.unmarshalNCharacterInput2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacterInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["character"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_receive_task_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -713,21 +671,6 @@ func (ec *executionContext) field_Query_getWorkerItems_args(ctx context.Context,
 		}
 	}
 	args["page"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["name"] = arg0
 	return args, nil
 }
 
@@ -906,153 +849,6 @@ func (ec *executionContext) _BrokerPageResponse_items(ctx context.Context, field
 	return ec.marshalOBrokerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Character_id(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Character",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Character_name(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Character",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Character_likes(ctx context.Context, field graphql.CollectedField, obj *model.Character) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Character",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Likes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNInt2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_add(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_add_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Add(rctx, args["character"].(model.CharacterInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Character)
-	fc.Result = res
-	return ec.marshalNCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_receive_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1179,7 +975,7 @@ func (ec *executionContext) _Mutation_retryTask(ctx context.Context, field graph
 	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_characters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getSystemStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1197,49 +993,7 @@ func (ec *executionContext) _Query_characters(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Characters(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Character)
-	fc.Result = res
-	return ec.marshalNCharacter2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacterᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_search_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Search(rctx, args["name"].(string))
+		return ec.resolvers.Query().GetSystemStatus(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1248,9 +1002,9 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Character)
+	res := resTmp.(*model.SystemStatusResponse)
 	fc.Result = res
-	return ec.marshalOCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx, field.Selections, res)
+	return ec.marshalOSystemStatusResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐSystemStatusResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getBrokerItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1548,6 +1302,146 @@ func (ec *executionContext) _StdResponse_msg(ctx context.Context, field graphql.
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SystemStatusResponse_broker(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SystemStatusResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Broker, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*int64)
+	fc.Result = res
+	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SystemStatusResponse_worker(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SystemStatusResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Worker, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*int64)
+	fc.Result = res
+	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SystemStatusResponse_task(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SystemStatusResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Task, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*int64)
+	fc.Result = res
+	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SystemStatusResponse_taskResult(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SystemStatusResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaskResult, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*int64)
+	fc.Result = res
+	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
@@ -3048,34 +2942,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputCharacterInput(ctx context.Context, obj interface{}) (model.CharacterInput, error) {
-	var it model.CharacterInput
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "likes":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("likes"))
-			it.Likes, err = ec.unmarshalNInt2int64(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputGetBrokerItemsInput(ctx context.Context, obj interface{}) (model.GetBrokerItemsInput, error) {
 	var it model.GetBrokerItemsInput
 	var asMap = obj.(map[string]interface{})
@@ -3331,43 +3197,6 @@ func (ec *executionContext) _BrokerPageResponse(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var characterImplementors = []string{"Character"}
-
-func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj *model.Character) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, characterImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Character")
-		case "id":
-			out.Values[i] = ec._Character_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "name":
-			out.Values[i] = ec._Character_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "likes":
-			out.Values[i] = ec._Character_likes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3383,11 +3212,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "add":
-			out.Values[i] = ec._Mutation_add(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "receive_task":
 			out.Values[i] = ec._Mutation_receive_task(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -3429,7 +3253,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "characters":
+		case "getSystemStatus":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3437,21 +3261,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_characters(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "search":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_search(ctx, field)
+				res = ec._Query_getSystemStatus(ctx, field)
 				return res
 			})
 		case "getBrokerItems":
@@ -3531,6 +3341,48 @@ func (ec *executionContext) _StdResponse(ctx context.Context, sel ast.SelectionS
 			}
 		case "msg":
 			out.Values[i] = ec._StdResponse_msg(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var systemStatusResponseImplementors = []string{"SystemStatusResponse"}
+
+func (ec *executionContext) _SystemStatusResponse(ctx context.Context, sel ast.SelectionSet, obj *model.SystemStatusResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, systemStatusResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SystemStatusResponse")
+		case "broker":
+			out.Values[i] = ec._SystemStatusResponse_broker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "worker":
+			out.Values[i] = ec._SystemStatusResponse_worker(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "task":
+			out.Values[i] = ec._SystemStatusResponse_task(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "taskResult":
+			out.Values[i] = ec._SystemStatusResponse_taskResult(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3922,77 +3774,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCharacter2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx context.Context, sel ast.SelectionSet, v model.Character) graphql.Marshaler {
-	return ec._Character(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCharacter2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacterᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Character) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx context.Context, sel ast.SelectionSet, v *model.Character) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Character(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNCharacterInput2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacterInput(ctx context.Context, v interface{}) (model.CharacterInput, error) {
-	res, err := ec.unmarshalInputCharacterInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNInt2int64(ctx context.Context, v interface{}) (int64, error) {
 	res, err := graphql.UnmarshalInt64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4006,6 +3787,36 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNInt2ᚕᚖint64(ctx context.Context, v interface{}) ([]*int64, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*int64, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOInt2ᚖint64(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNInt2ᚕᚖint64(ctx context.Context, sel ast.SelectionSet, v []*int64) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOInt2ᚖint64(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNStdResponse2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx context.Context, sel ast.SelectionSet, v model.StdResponse) graphql.Marshaler {
@@ -4348,13 +4159,6 @@ func (ec *executionContext) marshalOBrokerScalar2ᚖgithubᚗcomᚋsunzhongshan1
 	return scalar.MarshalBrokerScalar(v)
 }
 
-func (ec *executionContext) marshalOCharacter2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐCharacter(ctx context.Context, sel ast.SelectionSet, v *model.Character) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Character(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalOGetBrokerItemsInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetBrokerItemsInput(ctx context.Context, v interface{}) (*model.GetBrokerItemsInput, error) {
 	if v == nil {
 		return nil, nil
@@ -4387,6 +4191,21 @@ func (ec *executionContext) unmarshalOGetWorkerItemsInput2ᚖgithubᚗcomᚋsunz
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt64(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalInt64(*v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4409,6 +4228,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOSystemStatusResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐSystemStatusResponse(ctx context.Context, sel ast.SelectionSet, v *model.SystemStatusResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SystemStatusResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInput(ctx context.Context, v interface{}) (*model.TaskInput, error) {
