@@ -10,12 +10,18 @@ import (
 )
 
 type TaskService interface {
+	AnalyseTaskStatus(pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error)
 	FindOne(filter bson.M) (*model.Task, error)
 	InsertOne(worker *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 }
 
 type Task struct {
+}
+
+func (s *Task) AnalyseTaskStatus(pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error) {
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	return taskRepo.AnalyseTaskStatus(context.TODO(), pipeline)
 }
 
 func (s *Task) FindOne(filter bson.M) (*model.Task, error) {

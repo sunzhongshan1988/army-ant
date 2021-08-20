@@ -15,7 +15,7 @@ var Database = "armyant_dev"
 
 func Init() *mongo.Client {
 
-	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/armyant_dev?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
+	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/" + Database + "?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

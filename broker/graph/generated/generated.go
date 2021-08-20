@@ -469,10 +469,10 @@ type StdResponse {
 
 # Get system status
 type SystemStatusResponse {
-  broker: [Int]!
-  worker: [Int]!
-  task:   [Int]!
-  taskResult: [Int]!
+  broker: Int
+  worker: Int
+  task:   Int
+  taskResult: Int
  }
 
 # Get broker items
@@ -1329,14 +1329,11 @@ func (ec *executionContext) _SystemStatusResponse_broker(ctx context.Context, fi
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*int64)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SystemStatusResponse_worker(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
@@ -1364,14 +1361,11 @@ func (ec *executionContext) _SystemStatusResponse_worker(ctx context.Context, fi
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*int64)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SystemStatusResponse_task(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
@@ -1399,14 +1393,11 @@ func (ec *executionContext) _SystemStatusResponse_task(ctx context.Context, fiel
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*int64)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _SystemStatusResponse_taskResult(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
@@ -1434,14 +1425,11 @@ func (ec *executionContext) _SystemStatusResponse_taskResult(ctx context.Context
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*int64)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalNInt2ᚕᚖint64(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
@@ -3368,24 +3356,12 @@ func (ec *executionContext) _SystemStatusResponse(ctx context.Context, sel ast.S
 			out.Values[i] = graphql.MarshalString("SystemStatusResponse")
 		case "broker":
 			out.Values[i] = ec._SystemStatusResponse_broker(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "worker":
 			out.Values[i] = ec._SystemStatusResponse_worker(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "task":
 			out.Values[i] = ec._SystemStatusResponse_task(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "taskResult":
 			out.Values[i] = ec._SystemStatusResponse_taskResult(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3787,36 +3763,6 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNInt2ᚕᚖint64(ctx context.Context, v interface{}) ([]*int64, error) {
-	var vSlice []interface{}
-	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
-	}
-	var err error
-	res := make([]*int64, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOInt2ᚖint64(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNInt2ᚕᚖint64(ctx context.Context, sel ast.SelectionSet, v []*int64) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOInt2ᚖint64(ctx, sel, v[i])
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNStdResponse2githubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx context.Context, sel ast.SelectionSet, v model.StdResponse) graphql.Marshaler {

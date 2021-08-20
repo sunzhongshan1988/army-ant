@@ -7,7 +7,6 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/ptypes"
@@ -19,6 +18,7 @@ import (
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error) {
@@ -219,7 +219,13 @@ func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstan
 }
 
 func (r *queryResolver) GetSystemStatus(ctx context.Context) (*model.SystemStatusResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	taskService := service.Task{}
+
+	pipeline := mongo.Pipeline{
+		{{"$group", bson.D{{"_id", "$status"}, {"total", bson.D{{"$sum", 1}}}}}},
+	}
+	_, _ = taskService.AnalyseTaskStatus(pipeline)
+	return nil, nil
 }
 
 func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error) {

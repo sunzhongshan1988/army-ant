@@ -32,10 +32,10 @@ type StdResponse {
 
 # Get system status
 type SystemStatusResponse {
-  broker: [Int]!
-  worker: [Int]!
-  task:   [Int]!
-  taskResult: [Int]!
+  broker: Int
+  worker: Int
+  task:   Int
+  taskResult: Int
  }
 
 # Get broker items

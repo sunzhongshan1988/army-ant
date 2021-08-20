@@ -35,10 +35,10 @@ type StdResponse struct {
 }
 
 type SystemStatusResponse struct {
-	Broker     []*int64 `json:"broker"`
-	Worker     []*int64 `json:"worker"`
-	Task       []*int64 `json:"task"`
-	TaskResult []*int64 `json:"taskResult"`
+	Broker     *int64 `json:"broker"`
+	Worker     *int64 `json:"worker"`
+	Task       *int64 `json:"task"`
+	TaskResult *int64 `json:"taskResult"`
 }
 
 type TaskInput struct {

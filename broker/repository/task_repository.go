@@ -12,7 +12,7 @@ import (
 )
 
 type TaskRepository interface {
-	AnalyseStatus(ctx context.Context, filter bson.M) error
+	AnalyseTaskStatus(ctx context.Context, pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.Task, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error)
 	InsertOne(ctx context.Context, tr *model.Task) (*mongo.InsertOneResult, error)
@@ -23,7 +23,7 @@ type TaskMongo struct {
 	Client *mongo.Client
 }
 
-func (r *TaskMongo) AnalyseStatus(ctx context.Context, pipeline bson.M) (*[]model.AnalyseTaskStatus, error) {
+func (r *TaskMongo) AnalyseTaskStatus(ctx context.Context, pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error) {
 	var result []model.AnalyseTaskStatus
 
 	cur, err := r.Client.Database(mgdb.Database).Collection("task").Aggregate(ctx, pipeline)
