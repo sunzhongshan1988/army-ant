@@ -83,6 +83,7 @@ message Command {
   string app = 10;
   repeated string args = 14;
   repeated string env = 16;
+  string dir = 18;
 }
 message TaskResponse {
   int32 status = 10;

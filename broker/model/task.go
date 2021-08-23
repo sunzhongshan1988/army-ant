@@ -33,6 +33,7 @@ type Command struct {
 	App  string   `json:"app"`
 	Args []string `json:"args"`
 	Env  []string `json:"env"`
+	Dir  string   `json:"dir"`
 }
 type DNA struct {
 	Cmd     *Command `json:"cmd"`
@@ -42,6 +43,7 @@ type DNA struct {
 type CommandMutation struct {
 	Args []string `json:"args"`
 	Env  []string `json:"env"`
+	Dir  string   `json:"dir"`
 }
 type Mutation struct {
 	Cmd     *CommandMutation `json:"cmd"`

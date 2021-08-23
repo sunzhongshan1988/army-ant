@@ -11,6 +11,7 @@ type Input struct {
 	App        string
 	Args       []string
 	Env        []string
+	Dir        string
 }
 
 type CommandResult struct {

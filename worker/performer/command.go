@@ -23,6 +23,7 @@ func Standard(input model.Input) {
 
 	cmd := exec.Command(input.App, input.Args...)
 	cmd.Env = append(os.Environ(), input.Env...)
+	cmd.Dir = input.Dir
 
 	stdout, errSo := cmd.StdoutPipe()
 	if errSo != nil {

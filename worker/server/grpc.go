@@ -50,6 +50,7 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 		App:        in.Dna.Cmd.App,
 		Args:       in.Dna.Cmd.Args,
 		Env:        in.Dna.Cmd.Env,
+		Dir:        in.Dna.Cmd.Dir,
 	}
 
 	res := &pb.TaskResponse{
