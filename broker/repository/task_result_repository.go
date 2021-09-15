@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,12 +16,12 @@ type TaskResultRepository interface {
 }
 
 type TaskResultMongo struct {
-	Client *mongo.Client
+	Database *mongo.Database
 }
 
 func (r *TaskResultMongo) InsertOne(ctx context.Context, worker *model.TaskResult) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Client.Database(mgdb.Database).Collection("task_result").InsertOne(ctx, worker)
+	insertResult, err := r.Database.Collection("task_result").InsertOne(ctx, worker)
 
 	if err != nil {
 		log.Printf("[mgdb,save] error:%v", err)
@@ -45,14 +44,14 @@ func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *mode
 		findOptions.SetSkip(page.Index * page.Size)
 	}
 
-	cur, err := r.Client.Database(mgdb.Database).Collection("task_result").Find(context.TODO(), filter, findOptions)
+	cur, err := r.Database.Collection("task_result").Find(context.TODO(), filter, findOptions)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
 		log.Printf("[error,mgdb] error:%v", err)
 	}
 
-	count, err1 := r.Client.Database(mgdb.Database).Collection("task_result").CountDocuments(ctx, filter)
+	count, err1 := r.Database.Collection("task_result").CountDocuments(ctx, filter)
 	if err1 != nil {
 		log.Printf("[error,mgdb] error:%v", err)
 	}

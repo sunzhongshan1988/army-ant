@@ -2,22 +2,19 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/google/uuid"
-	"github.com/sunzhongshan1988/army-ant/broker/model"
-	"github.com/sunzhongshan1988/army-ant/broker/service"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"os"
 )
 
 type Broker struct {
-	Label       string `json:"label"`
-	BrokerId    string `json:"brokerId"`
-	BrokerType  string `json:"brokerType"`
-	Address     string `json:"address"`
-	GrpcPort    string `json:"grpcPort"`
-	GraphqlPort string `json:"graphqlPort"`
+	Label           string `json:"label"`
+	BrokerId        string `json:"brokerId"`
+	BrokerType      string `json:"brokerType"`
+	Address         string `json:"address"`
+	GrpcPort        string `json:"grpcPort"`
+	GraphqlPort     string `json:"graphqlPort"`
+	MongodbUri      string `json:"mongodbUri"`
+	MongodbDatabase string `json:"mongodbDatabase"`
 }
 
 var broker = &Broker{}
@@ -29,8 +26,10 @@ func Init() {
 	broker.Address = os.Getenv("AAB_ADDRESS")          // "127.0.0.1"
 	broker.GrpcPort = os.Getenv("AAB_GRPC_PORT")       // "50051"
 	broker.GraphqlPort = os.Getenv("AAB_GRAPHQL_PORT") // "8080"
-
-	registerBroker()
+	// mongodb uri
+	// example: "mongodb://armyant:P@ssw0rd@10.11.51.152:27017/armyant_dev?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
+	broker.MongodbUri = os.Getenv("AAB_MONGODB_URI")
+	broker.MongodbDatabase = os.Getenv("AAB_MONGODB_DATABASE") // mongodb database name
 
 	jsonStr, _ := json.Marshal(broker)
 	log.Printf("[config, init] info: %v", string(jsonStr))
@@ -70,24 +69,10 @@ func GetGraphQLPort() string {
 	return broker.GraphqlPort
 }
 
-func registerBroker() {
-	brokerService := service.Broker{}
+func GetMongodbUri() string {
+	return broker.MongodbUri
+}
 
-	// Query Database
-	filter := bson.M{"broker_link": GetGrpcLink(), "broker_label": GetBrokerLabel()}
-	r, _ := brokerService.FindOne(filter)
-	if r != nil {
-		SetBrokerId(r.BrokerId)
-	} else {
-		SetBrokerId(uuid.New().String())
-		// Save worker's information to DB
-		broker := &model.Broker{
-			BrokerId:    GetBrokerId(),
-			BrokerLink:  GetGrpcLink(),
-			BrokerLabel: GetBrokerLabel(),
-			CreateAt:    ptypes.TimestampNow(),
-			UpdateAt:    ptypes.TimestampNow(),
-		}
-		_, _ = brokerService.InsertOne(broker)
-	}
+func GetMongodbDatabase() string {
+	return broker.MongodbDatabase
 }

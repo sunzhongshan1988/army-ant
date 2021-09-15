@@ -20,25 +20,25 @@ type Task struct {
 }
 
 func (s *Task) AnalyseTaskStatus(pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.AnalyseTaskStatus(context.TODO(), pipeline)
 }
 
 func (s *Task) FindOne(filter bson.M) (*model.Task, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.FindOne(context.TODO(), filter)
 }
 
 func (s *Task) FindAll(filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.FindAll(context.TODO(), filter, page)
 }
 
 func (s *Task) InsertOne(tr *model.Task) (*mongo.InsertOneResult, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.InsertOne(context.TODO(), tr)
 }
 func (s *Task) UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
-	var taskRepo repository.TaskRepository = &repository.TaskMongo{Client: mgdb.Client}
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.UpdateOne(context.TODO(), filter, data)
 }

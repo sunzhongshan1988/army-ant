@@ -12,5 +12,5 @@ type SystemStatusRepository interface {
 }
 
 type SystemStatusMongo struct {
-	Client *mongo.Client
+	Database *mongo.Database
 }

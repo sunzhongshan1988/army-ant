@@ -5,6 +5,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// TaskResult Status 	0 - success, 1 - error
 type TaskResult struct {
 	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	TaskId     primitive.ObjectID     `bson:"task_id,omitempty" json:"taskId"`

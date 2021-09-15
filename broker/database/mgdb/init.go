@@ -2,6 +2,7 @@ package mgdb
 
 import (
 	"context"
+	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -10,18 +11,15 @@ import (
 )
 
 var Client *mongo.Client
+var Database *mongo.Database
 
-var Database = "armyant_dev"
-
-func Init() *mongo.Client {
-
-	uri := "mongodb://armyant:%40WSX3edc@10.11.51.152:27017/" + Database + "?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
+func Init() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	var err error
-	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	Client, err = mongo.Connect(ctx, options.Client().ApplyURI(config.GetMongodbUri()))
 	if err != nil {
 		panic(err)
 	}
@@ -36,5 +34,5 @@ func Init() *mongo.Client {
 	}
 	log.Printf("[mgdb, init] info: Successfully connected and pinged.")
 
-	return Client
+	Database = Client.Database(config.GetMongodbDatabase())
 }

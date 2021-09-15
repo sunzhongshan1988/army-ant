@@ -5,6 +5,7 @@ import (
 	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	svr "github.com/sunzhongshan1988/army-ant/broker/server"
+	"github.com/sunzhongshan1988/army-ant/broker/service"
 	"log"
 	"sync"
 )
@@ -12,13 +13,17 @@ import (
 func main() {
 	log.Printf("------------Broker Started!------------")
 
+	// Initialized config
+	config.Init()
+
 	// Initialized mongo database
 	mgdb.Init()
 	client := mgdb.Client
 	defer client.Disconnect(context.Background())
 
-	// Initialized config
-	config.Init()
+	// register broker
+	brokerService := service.Broker{}
+	brokerService.Register()
 
 	wg := new(sync.WaitGroup)
 	wg.Add(2)

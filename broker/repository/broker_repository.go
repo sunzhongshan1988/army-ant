@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"github.com/sunzhongshan1988/army-ant/broker/database/mgdb"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,12 +17,12 @@ type BrokerRepository interface {
 }
 
 type BrokerMongo struct {
-	Client *mongo.Client
+	Database *mongo.Database
 }
 
 func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Client.Database(mgdb.Database).Collection("broker").InsertOne(ctx, broker)
+	insertResult, err := r.Database.Collection("broker").InsertOne(ctx, broker)
 	if err != nil {
 		log.Printf("[mongodb, save] error:%v", err)
 	}
@@ -37,7 +36,7 @@ func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker
 
 	var result model.Broker
 
-	err := r.Client.Database(mgdb.Database).Collection("broker").FindOne(ctx, filter).Decode(&result)
+	err := r.Database.Collection("broker").FindOne(ctx, filter).Decode(&result)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
@@ -60,14 +59,14 @@ func (r *BrokerMongo) FindAll(ctx context.Context, filter bson.M, page *model.Pa
 		findOptions.SetSkip(page.Index * page.Size)
 	}
 
-	cur, err := r.Client.Database(mgdb.Database).Collection("broker").Find(context.TODO(), filter, findOptions)
+	cur, err := r.Database.Collection("broker").Find(context.TODO(), filter, findOptions)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	} else if err != nil {
 		log.Printf("[mongodb, finall] error:%v", err)
 	}
 
-	count, err1 := r.Client.Database(mgdb.Database).Collection("broker").CountDocuments(ctx, filter)
+	count, err1 := r.Database.Collection("broker").CountDocuments(ctx, filter)
 	if err1 != nil {
 		log.Printf("[mongodb, finall] error:%v", err)
 	}

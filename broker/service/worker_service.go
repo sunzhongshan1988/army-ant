@@ -21,16 +21,16 @@ type Worker struct {
 }
 
 func (s *Worker) InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error) {
-	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mgdb.Client}
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Database: mgdb.Database}
 	return workerRepo.InsertOne(context.TODO(), worker)
 }
 
 func (s *Worker) FindOne(filter bson.M) (*model.Worker, error) {
-	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mgdb.Client}
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Database: mgdb.Database}
 	return workerRepo.FindOne(context.TODO(), filter)
 }
 
 func (s *Worker) FindAll(filter bson.M, page *model.PageableRequest) (*model.WorkerItemsPage, error) {
-	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Client: mgdb.Client}
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Database: mgdb.Database}
 	return workerRepo.FindAll(context.TODO(), filter, page)
 }
