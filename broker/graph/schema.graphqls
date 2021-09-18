@@ -44,9 +44,9 @@ input GetBrokerItemsInput {
   size: Int!
  }
 type BrokerPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [BrokerScalar]
 }
 
@@ -56,9 +56,9 @@ input GetWorkerItemsInput {
   size: Int!
 }
 type WorkerPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [WorkerScalar]
 }
 
@@ -68,9 +68,9 @@ input GetTaskItemsInput {
   size: Int!
 }
 type TaskPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [TaskScalar]
 }
 
@@ -80,9 +80,9 @@ input GetTaskResultItemsInput {
   size: Int!
 }
 type TaskResultPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [TaskResultScalar]
 }
 

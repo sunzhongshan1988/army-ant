@@ -240,10 +240,10 @@ func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBroke
 	dbRes, _ := brokerService.FindAll(bson.M{}, pg)
 
 	res := &model.BrokerPageResponse{
-		TotalPages:  dbRes.TotalPages,
-		TotalItems:  dbRes.TotalItems,
-		CurrentPage: dbRes.CurrentPage,
-		Items:       dbRes.Items,
+		Total:    dbRes.Total,
+		PageSize: dbRes.PageSize,
+		Current:  dbRes.Current,
+		Items:    dbRes.Items,
 	}
 	return res, nil
 }
@@ -258,10 +258,10 @@ func (r *queryResolver) GetWorkerItems(ctx context.Context, page *model.GetWorke
 	dbRes, _ := workerService.FindAll(bson.M{}, pg)
 
 	res := &model.WorkerPageResponse{
-		TotalPages:  dbRes.TotalPages,
-		TotalItems:  dbRes.TotalItems,
-		CurrentPage: dbRes.CurrentPage,
-		Items:       dbRes.Items,
+		Total:    dbRes.Total,
+		PageSize: dbRes.PageSize,
+		Current:  dbRes.Current,
+		Items:    dbRes.Items,
 	}
 	return res, nil
 }
@@ -276,10 +276,10 @@ func (r *queryResolver) GetTaskItems(ctx context.Context, page *model.GetTaskIte
 	dbRes, _ := taskService.FindAll(bson.M{}, pg)
 
 	res := &model.TaskPageResponse{
-		TotalPages:  dbRes.TotalPages,
-		TotalItems:  dbRes.TotalItems,
-		CurrentPage: dbRes.CurrentPage,
-		Items:       dbRes.Items,
+		Total:    dbRes.Total,
+		PageSize: dbRes.PageSize,
+		Current:  dbRes.Current,
+		Items:    dbRes.Items,
 	}
 	return res, nil
 }
@@ -294,10 +294,10 @@ func (r *queryResolver) GetTaskResultItems(ctx context.Context, page *model.GetT
 	dbRes, _ := taskResultService.FindAll(bson.M{}, pg)
 
 	res := &model.TaskResultPageResponse{
-		TotalPages:  dbRes.TotalPages,
-		TotalItems:  dbRes.TotalItems,
-		CurrentPage: dbRes.CurrentPage,
-		Items:       dbRes.Items,
+		Total:    dbRes.Total,
+		PageSize: dbRes.PageSize,
+		Current:  dbRes.Current,
+		Items:    dbRes.Items,
 	}
 	return res, nil
 }

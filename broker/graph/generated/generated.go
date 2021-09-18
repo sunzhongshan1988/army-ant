@@ -44,10 +44,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	BrokerPageResponse struct {
-		CurrentPage func(childComplexity int) int
-		Items       func(childComplexity int) int
-		TotalItems  func(childComplexity int) int
-		TotalPages  func(childComplexity int) int
+		Current  func(childComplexity int) int
+		Items    func(childComplexity int) int
+		PageSize func(childComplexity int) int
+		Total    func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -77,24 +77,24 @@ type ComplexityRoot struct {
 	}
 
 	TaskPageResponse struct {
-		CurrentPage func(childComplexity int) int
-		Items       func(childComplexity int) int
-		TotalItems  func(childComplexity int) int
-		TotalPages  func(childComplexity int) int
+		Current  func(childComplexity int) int
+		Items    func(childComplexity int) int
+		PageSize func(childComplexity int) int
+		Total    func(childComplexity int) int
 	}
 
 	TaskResultPageResponse struct {
-		CurrentPage func(childComplexity int) int
-		Items       func(childComplexity int) int
-		TotalItems  func(childComplexity int) int
-		TotalPages  func(childComplexity int) int
+		Current  func(childComplexity int) int
+		Items    func(childComplexity int) int
+		PageSize func(childComplexity int) int
+		Total    func(childComplexity int) int
 	}
 
 	WorkerPageResponse struct {
-		CurrentPage func(childComplexity int) int
-		Items       func(childComplexity int) int
-		TotalItems  func(childComplexity int) int
-		TotalPages  func(childComplexity int) int
+		Current  func(childComplexity int) int
+		Items    func(childComplexity int) int
+		PageSize func(childComplexity int) int
+		Total    func(childComplexity int) int
 	}
 }
 
@@ -126,12 +126,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "BrokerPageResponse.currentPage":
-		if e.complexity.BrokerPageResponse.CurrentPage == nil {
+	case "BrokerPageResponse.current":
+		if e.complexity.BrokerPageResponse.Current == nil {
 			break
 		}
 
-		return e.complexity.BrokerPageResponse.CurrentPage(childComplexity), true
+		return e.complexity.BrokerPageResponse.Current(childComplexity), true
 
 	case "BrokerPageResponse.items":
 		if e.complexity.BrokerPageResponse.Items == nil {
@@ -140,19 +140,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BrokerPageResponse.Items(childComplexity), true
 
-	case "BrokerPageResponse.totalItems":
-		if e.complexity.BrokerPageResponse.TotalItems == nil {
+	case "BrokerPageResponse.pageSize":
+		if e.complexity.BrokerPageResponse.PageSize == nil {
 			break
 		}
 
-		return e.complexity.BrokerPageResponse.TotalItems(childComplexity), true
+		return e.complexity.BrokerPageResponse.PageSize(childComplexity), true
 
-	case "BrokerPageResponse.totalPages":
-		if e.complexity.BrokerPageResponse.TotalPages == nil {
+	case "BrokerPageResponse.total":
+		if e.complexity.BrokerPageResponse.Total == nil {
 			break
 		}
 
-		return e.complexity.BrokerPageResponse.TotalPages(childComplexity), true
+		return e.complexity.BrokerPageResponse.Total(childComplexity), true
 
 	case "Mutation.receive_task":
 		if e.complexity.Mutation.ReceiveTask == nil {
@@ -287,12 +287,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SystemStatusResponse.Worker(childComplexity), true
 
-	case "TaskPageResponse.currentPage":
-		if e.complexity.TaskPageResponse.CurrentPage == nil {
+	case "TaskPageResponse.current":
+		if e.complexity.TaskPageResponse.Current == nil {
 			break
 		}
 
-		return e.complexity.TaskPageResponse.CurrentPage(childComplexity), true
+		return e.complexity.TaskPageResponse.Current(childComplexity), true
 
 	case "TaskPageResponse.items":
 		if e.complexity.TaskPageResponse.Items == nil {
@@ -301,26 +301,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TaskPageResponse.Items(childComplexity), true
 
-	case "TaskPageResponse.totalItems":
-		if e.complexity.TaskPageResponse.TotalItems == nil {
+	case "TaskPageResponse.pageSize":
+		if e.complexity.TaskPageResponse.PageSize == nil {
 			break
 		}
 
-		return e.complexity.TaskPageResponse.TotalItems(childComplexity), true
+		return e.complexity.TaskPageResponse.PageSize(childComplexity), true
 
-	case "TaskPageResponse.totalPages":
-		if e.complexity.TaskPageResponse.TotalPages == nil {
+	case "TaskPageResponse.total":
+		if e.complexity.TaskPageResponse.Total == nil {
 			break
 		}
 
-		return e.complexity.TaskPageResponse.TotalPages(childComplexity), true
+		return e.complexity.TaskPageResponse.Total(childComplexity), true
 
-	case "TaskResultPageResponse.currentPage":
-		if e.complexity.TaskResultPageResponse.CurrentPage == nil {
+	case "TaskResultPageResponse.current":
+		if e.complexity.TaskResultPageResponse.Current == nil {
 			break
 		}
 
-		return e.complexity.TaskResultPageResponse.CurrentPage(childComplexity), true
+		return e.complexity.TaskResultPageResponse.Current(childComplexity), true
 
 	case "TaskResultPageResponse.items":
 		if e.complexity.TaskResultPageResponse.Items == nil {
@@ -329,26 +329,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.TaskResultPageResponse.Items(childComplexity), true
 
-	case "TaskResultPageResponse.totalItems":
-		if e.complexity.TaskResultPageResponse.TotalItems == nil {
+	case "TaskResultPageResponse.pageSize":
+		if e.complexity.TaskResultPageResponse.PageSize == nil {
 			break
 		}
 
-		return e.complexity.TaskResultPageResponse.TotalItems(childComplexity), true
+		return e.complexity.TaskResultPageResponse.PageSize(childComplexity), true
 
-	case "TaskResultPageResponse.totalPages":
-		if e.complexity.TaskResultPageResponse.TotalPages == nil {
+	case "TaskResultPageResponse.total":
+		if e.complexity.TaskResultPageResponse.Total == nil {
 			break
 		}
 
-		return e.complexity.TaskResultPageResponse.TotalPages(childComplexity), true
+		return e.complexity.TaskResultPageResponse.Total(childComplexity), true
 
-	case "WorkerPageResponse.currentPage":
-		if e.complexity.WorkerPageResponse.CurrentPage == nil {
+	case "WorkerPageResponse.current":
+		if e.complexity.WorkerPageResponse.Current == nil {
 			break
 		}
 
-		return e.complexity.WorkerPageResponse.CurrentPage(childComplexity), true
+		return e.complexity.WorkerPageResponse.Current(childComplexity), true
 
 	case "WorkerPageResponse.items":
 		if e.complexity.WorkerPageResponse.Items == nil {
@@ -357,19 +357,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.WorkerPageResponse.Items(childComplexity), true
 
-	case "WorkerPageResponse.totalItems":
-		if e.complexity.WorkerPageResponse.TotalItems == nil {
+	case "WorkerPageResponse.pageSize":
+		if e.complexity.WorkerPageResponse.PageSize == nil {
 			break
 		}
 
-		return e.complexity.WorkerPageResponse.TotalItems(childComplexity), true
+		return e.complexity.WorkerPageResponse.PageSize(childComplexity), true
 
-	case "WorkerPageResponse.totalPages":
-		if e.complexity.WorkerPageResponse.TotalPages == nil {
+	case "WorkerPageResponse.total":
+		if e.complexity.WorkerPageResponse.Total == nil {
 			break
 		}
 
-		return e.complexity.WorkerPageResponse.TotalPages(childComplexity), true
+		return e.complexity.WorkerPageResponse.Total(childComplexity), true
 
 	}
 	return 0, false
@@ -481,9 +481,9 @@ input GetBrokerItemsInput {
   size: Int!
  }
 type BrokerPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [BrokerScalar]
 }
 
@@ -493,9 +493,9 @@ input GetWorkerItemsInput {
   size: Int!
 }
 type WorkerPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [WorkerScalar]
 }
 
@@ -505,9 +505,9 @@ input GetTaskItemsInput {
   size: Int!
 }
 type TaskPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [TaskScalar]
 }
 
@@ -517,9 +517,9 @@ input GetTaskResultItemsInput {
   size: Int!
 }
 type TaskResultPageResponse {
-  totalItems: Int!
-  totalPages: Int!
-  currentPage: Int!
+  total: Int!
+  pageSize: Int!
+  current: Int!
   items: [TaskResultScalar]
 }
 
@@ -712,7 +712,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _BrokerPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_total(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -730,7 +730,7 @@ func (ec *executionContext) _BrokerPageResponse_totalItems(ctx context.Context, 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalItems, nil
+		return obj.Total, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -747,7 +747,7 @@ func (ec *executionContext) _BrokerPageResponse_totalItems(ctx context.Context, 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BrokerPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_pageSize(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -765,7 +765,7 @@ func (ec *executionContext) _BrokerPageResponse_totalPages(ctx context.Context, 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPages, nil
+		return obj.PageSize, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -782,7 +782,7 @@ func (ec *executionContext) _BrokerPageResponse_totalPages(ctx context.Context, 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _BrokerPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _BrokerPageResponse_current(ctx context.Context, field graphql.CollectedField, obj *model.BrokerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -800,7 +800,7 @@ func (ec *executionContext) _BrokerPageResponse_currentPage(ctx context.Context,
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CurrentPage, nil
+		return obj.Current, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1432,7 +1432,7 @@ func (ec *executionContext) _SystemStatusResponse_taskResult(ctx context.Context
 	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskPageResponse_total(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1450,7 +1450,7 @@ func (ec *executionContext) _TaskPageResponse_totalItems(ctx context.Context, fi
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalItems, nil
+		return obj.Total, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1467,7 +1467,7 @@ func (ec *executionContext) _TaskPageResponse_totalItems(ctx context.Context, fi
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskPageResponse_pageSize(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1485,7 +1485,7 @@ func (ec *executionContext) _TaskPageResponse_totalPages(ctx context.Context, fi
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPages, nil
+		return obj.PageSize, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1502,7 +1502,7 @@ func (ec *executionContext) _TaskPageResponse_totalPages(ctx context.Context, fi
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskPageResponse_current(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1520,7 +1520,7 @@ func (ec *executionContext) _TaskPageResponse_currentPage(ctx context.Context, f
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CurrentPage, nil
+		return obj.Current, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1569,7 +1569,7 @@ func (ec *executionContext) _TaskPageResponse_items(ctx context.Context, field g
 	return ec.marshalOTaskScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTask(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskResultPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskResultPageResponse_total(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1587,7 +1587,7 @@ func (ec *executionContext) _TaskResultPageResponse_totalItems(ctx context.Conte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalItems, nil
+		return obj.Total, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1604,7 +1604,7 @@ func (ec *executionContext) _TaskResultPageResponse_totalItems(ctx context.Conte
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskResultPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskResultPageResponse_pageSize(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1622,7 +1622,7 @@ func (ec *executionContext) _TaskResultPageResponse_totalPages(ctx context.Conte
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPages, nil
+		return obj.PageSize, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1639,7 +1639,7 @@ func (ec *executionContext) _TaskResultPageResponse_totalPages(ctx context.Conte
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TaskResultPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _TaskResultPageResponse_current(ctx context.Context, field graphql.CollectedField, obj *model.TaskResultPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1657,7 +1657,7 @@ func (ec *executionContext) _TaskResultPageResponse_currentPage(ctx context.Cont
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CurrentPage, nil
+		return obj.Current, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1706,7 +1706,7 @@ func (ec *executionContext) _TaskResultPageResponse_items(ctx context.Context, f
 	return ec.marshalOTaskResultScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WorkerPageResponse_totalItems(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _WorkerPageResponse_total(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1724,7 +1724,7 @@ func (ec *executionContext) _WorkerPageResponse_totalItems(ctx context.Context, 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalItems, nil
+		return obj.Total, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1741,7 +1741,7 @@ func (ec *executionContext) _WorkerPageResponse_totalItems(ctx context.Context, 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WorkerPageResponse_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _WorkerPageResponse_pageSize(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1759,7 +1759,7 @@ func (ec *executionContext) _WorkerPageResponse_totalPages(ctx context.Context, 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPages, nil
+		return obj.PageSize, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1776,7 +1776,7 @@ func (ec *executionContext) _WorkerPageResponse_totalPages(ctx context.Context, 
 	return ec.marshalNInt2int64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _WorkerPageResponse_currentPage(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _WorkerPageResponse_current(ctx context.Context, field graphql.CollectedField, obj *model.WorkerPageResponse) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1794,7 +1794,7 @@ func (ec *executionContext) _WorkerPageResponse_currentPage(ctx context.Context,
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CurrentPage, nil
+		return obj.Current, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3157,18 +3157,18 @@ func (ec *executionContext) _BrokerPageResponse(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("BrokerPageResponse")
-		case "totalItems":
-			out.Values[i] = ec._BrokerPageResponse_totalItems(ctx, field, obj)
+		case "total":
+			out.Values[i] = ec._BrokerPageResponse_total(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "totalPages":
-			out.Values[i] = ec._BrokerPageResponse_totalPages(ctx, field, obj)
+		case "pageSize":
+			out.Values[i] = ec._BrokerPageResponse_pageSize(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "currentPage":
-			out.Values[i] = ec._BrokerPageResponse_currentPage(ctx, field, obj)
+		case "current":
+			out.Values[i] = ec._BrokerPageResponse_current(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3384,18 +3384,18 @@ func (ec *executionContext) _TaskPageResponse(ctx context.Context, sel ast.Selec
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("TaskPageResponse")
-		case "totalItems":
-			out.Values[i] = ec._TaskPageResponse_totalItems(ctx, field, obj)
+		case "total":
+			out.Values[i] = ec._TaskPageResponse_total(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "totalPages":
-			out.Values[i] = ec._TaskPageResponse_totalPages(ctx, field, obj)
+		case "pageSize":
+			out.Values[i] = ec._TaskPageResponse_pageSize(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "currentPage":
-			out.Values[i] = ec._TaskPageResponse_currentPage(ctx, field, obj)
+		case "current":
+			out.Values[i] = ec._TaskPageResponse_current(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3423,18 +3423,18 @@ func (ec *executionContext) _TaskResultPageResponse(ctx context.Context, sel ast
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("TaskResultPageResponse")
-		case "totalItems":
-			out.Values[i] = ec._TaskResultPageResponse_totalItems(ctx, field, obj)
+		case "total":
+			out.Values[i] = ec._TaskResultPageResponse_total(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "totalPages":
-			out.Values[i] = ec._TaskResultPageResponse_totalPages(ctx, field, obj)
+		case "pageSize":
+			out.Values[i] = ec._TaskResultPageResponse_pageSize(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "currentPage":
-			out.Values[i] = ec._TaskResultPageResponse_currentPage(ctx, field, obj)
+		case "current":
+			out.Values[i] = ec._TaskResultPageResponse_current(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3462,18 +3462,18 @@ func (ec *executionContext) _WorkerPageResponse(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("WorkerPageResponse")
-		case "totalItems":
-			out.Values[i] = ec._WorkerPageResponse_totalItems(ctx, field, obj)
+		case "total":
+			out.Values[i] = ec._WorkerPageResponse_total(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "totalPages":
-			out.Values[i] = ec._WorkerPageResponse_totalPages(ctx, field, obj)
+		case "pageSize":
+			out.Values[i] = ec._WorkerPageResponse_pageSize(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "currentPage":
-			out.Values[i] = ec._WorkerPageResponse_currentPage(ctx, field, obj)
+		case "current":
+			out.Values[i] = ec._WorkerPageResponse_current(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

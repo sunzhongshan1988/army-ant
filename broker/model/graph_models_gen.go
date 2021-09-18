@@ -3,10 +3,10 @@
 package model
 
 type BrokerPageResponse struct {
-	TotalItems  int64     `json:"totalItems"`
-	TotalPages  int64     `json:"totalPages"`
-	CurrentPage int64     `json:"currentPage"`
-	Items       []*Broker `json:"items"`
+	Total    int64     `json:"total"`
+	PageSize int64     `json:"pageSize"`
+	Current  int64     `json:"current"`
+	Items    []*Broker `json:"items"`
 }
 
 type GetBrokerItemsInput struct {
@@ -57,22 +57,22 @@ type TaskInstanceInput struct {
 }
 
 type TaskPageResponse struct {
-	TotalItems  int64   `json:"totalItems"`
-	TotalPages  int64   `json:"totalPages"`
-	CurrentPage int64   `json:"currentPage"`
-	Items       []*Task `json:"items"`
+	Total    int64   `json:"total"`
+	PageSize int64   `json:"pageSize"`
+	Current  int64   `json:"current"`
+	Items    []*Task `json:"items"`
 }
 
 type TaskResultPageResponse struct {
-	TotalItems  int64         `json:"totalItems"`
-	TotalPages  int64         `json:"totalPages"`
-	CurrentPage int64         `json:"currentPage"`
-	Items       []*TaskResult `json:"items"`
+	Total    int64         `json:"total"`
+	PageSize int64         `json:"pageSize"`
+	Current  int64         `json:"current"`
+	Items    []*TaskResult `json:"items"`
 }
 
 type WorkerPageResponse struct {
-	TotalItems  int64     `json:"totalItems"`
-	TotalPages  int64     `json:"totalPages"`
-	CurrentPage int64     `json:"currentPage"`
-	Items       []*Worker `json:"items"`
+	Total    int64     `json:"total"`
+	PageSize int64     `json:"pageSize"`
+	Current  int64     `json:"current"`
+	Items    []*Worker `json:"items"`
 }

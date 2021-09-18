@@ -7,7 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/net/context"
 	"log"
-	"math"
 )
 
 type TaskRepository interface {
@@ -82,9 +81,9 @@ func (r *TaskMongo) FindAll(ctx context.Context, filter bson.M, page *model.Page
 		log.Printf("[error,mgdb] error:%v", err)
 	}
 
-	result.TotalItems = count
-	result.TotalPages = int64(math.Ceil(float64(count) / float64(page.Size)))
-	result.CurrentPage = page.Index
+	result.Total = count
+	result.PageSize = page.Size
+	result.Current = page.Index
 
 	defer cur.Close(ctx)
 	if err = cur.All(ctx, &result.Items); err != nil {
