@@ -17,8 +17,8 @@ type Worker struct {
 }
 
 type WorkerItemsPage struct {
-	TotalItems  int64     `json:"totalItems"`
-	TotalPages  int64     `json:"totalPages"`
-	CurrentPage int64     `json:"currentItems"`
-	Items       []*Worker `json:"items"`
+	Total    int64     `json:"total"`
+	PageSize int64     `json:"pageSize"`
+	Current  int64     `json:"current"`
+	Items    []*Worker `json:"items"`
 }

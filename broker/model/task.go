@@ -9,6 +9,7 @@ import (
 // Task Type 	0 - manual, 1 - crontab
 type Task struct {
 	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
+	Name       string                 `bson:"name,omitempty" json:"name"`
 	InstanceId string                 `bson:"instance_id,omitempty" json:"instanceId"`
 	BrokerId   string                 `bson:"broker_id,omitempty" json:"brokerId"`
 	WorkerId   string                 `bson:"worker_id,omitempty" json:"workerId"`
@@ -18,15 +19,16 @@ type Task struct {
 	Cron       string                 `bson:"cron,omitempty" json:"cron"`
 	DNA        string                 `bson:"dna" json:"dna"`
 	Mutation   string                 `bson:"mutation" json:"mutation"`
+	Remark     string                 `bson:"remark" json:"remark"`
 	CreateAt   *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
 	UpdateAt   *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`
 }
 
 type TaskItemsPage struct {
-	TotalItems  int64   `json:"totalItems"`
-	TotalPages  int64   `json:"totalPages"`
-	CurrentPage int64   `json:"currentItems"`
-	Items       []*Task `json:"items"`
+	Total    int64   `json:"total"`
+	PageSize int64   `json:"pageSize"`
+	Current  int64   `json:"current"`
+	Items    []*Task `json:"items"`
 }
 
 type Command struct {

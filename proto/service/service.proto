@@ -47,6 +47,8 @@ message RegisterResponse {
 * Task Result
 */
 message TaskResultRequest {
+  string  task_name = 4;
+  string  task_remark = 5;
   string  task_id = 6;
   string  instance_id = 7;
   string  broker_id = 8;
@@ -67,6 +69,8 @@ message TaskResultResponse {
 */
 
 message TaskRequest {
+  string  task_name = 4;
+  string  task_remark = 5;
   string  instance_id = 10;
   string  task_id = 11;
   int64   type = 12;

@@ -110,6 +110,8 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 	taskObjID, _ := primitive.ObjectIDFromHex(in.TaskId)
 	tr := &model.TaskResult{
 		TaskId:     taskObjID,
+		TaskName:   in.TaskName,
+		TaskRemark: in.TaskRemark,
 		InstanceID: in.InstanceId,
 		BrokerId:   in.BrokerId,
 		WorkerId:   in.WorkerId,

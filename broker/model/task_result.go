@@ -9,6 +9,8 @@ import (
 type TaskResult struct {
 	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	TaskId     primitive.ObjectID     `bson:"task_id,omitempty" json:"taskId"`
+	TaskName   string                 `bson:"task_name,omitempty" json:"taskName"`
+	TaskRemark string                 `bson:"task_remark,omitempty" json:"taskRemark"`
 	InstanceID string                 `bson:"instance_id,omitempty" json:"instanceId"`
 	BrokerId   string                 `bson:"broker_id,omitempty" json:"brokerId"`
 	WorkerId   string                 `bson:"worker_id,omitempty" json:"workerId"`
@@ -20,8 +22,8 @@ type TaskResult struct {
 }
 
 type TaskResultItemsPage struct {
-	TotalItems  int64         `json:"totalItems"`
-	TotalPages  int64         `json:"totalPages"`
-	CurrentPage int64         `json:"currentItems"`
-	Items       []*TaskResult `json:"items"`
+	Total    int64         `json:"total"`
+	PageSize int64         `json:"pageSize"`
+	Current  int64         `json:"current"`
+	Items    []*TaskResult `json:"items"`
 }

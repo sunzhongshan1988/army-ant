@@ -1,6 +1,6 @@
 # Dev
 ## grpc
-`protoc.exe --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative  helloworld/helloworld.proto`
+`protoc.exe --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative  proto/service/service.proto`
 
 
 # graphql
@@ -22,10 +22,12 @@ go build
 For Broker and Worker, 'label' and 'address:port' is the only basis for distinguishing the same instance,
  and the change will be regarded as a new instance.
 ### Broker
-    AAB_LABEL           Broekr label
-	AAB_ADDRESS         Broker address
-	AAB_GRPC_PORT       Broker Grpc listen port
-	AAB_GRAPHQL_PORT    Broekr GraphQL listen port
+    AAB_LABEL            Broekr label
+	AAB_ADDRESS          Broker address
+	AAB_GRPC_PORT        Broker Grpc listen port
+	AAB_GRAPHQL_PORT     Broekr GraphQL listen port
+    AAB_MONGODB_URI      Mongo URI
+    AAB_MONGODB_DATABASE Mongo Database Name
 ### Worker
     AAW_BROKER_LINK     Worker link broker
     AAW_ADDRESS         Worker address
@@ -44,6 +46,8 @@ Environment=AAB_LABEL=system
 Environment=AAB_ADDRESS=127.0.0.1
 Environment=AAB_GRPC_PORT=50051
 Environment=AAB_GRAPHQL_PORT=8080
+Environment=AAB_MONGODB_URI=""
+Environment=AAB_MONGODB_DATABASE=
 WorkingDirectory=/root 
 ExecStart=/opt/armyant-broker
 TimeoutStopSec=10
