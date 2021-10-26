@@ -42,3 +42,7 @@ func (s *Task) UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error
 	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
 	return taskRepo.UpdateOne(context.TODO(), filter, data)
 }
+func (s *Task) UpdateMany(filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
+	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
+	return taskRepo.UpdateMany(context.TODO(), filter, data)
+}

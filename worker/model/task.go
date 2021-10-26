@@ -6,6 +6,8 @@ import (
 
 type Input struct {
 	TaskID     string
+	TaskName   string
+	TaskRemark string
 	InstanceID string
 	Type       int64
 	App        string
@@ -16,6 +18,8 @@ type Input struct {
 
 type CommandResult struct {
 	TaskID     string
+	TaskName   string
+	TaskRemark string
 	InstanceID string
 	Out        string
 	Type       int64

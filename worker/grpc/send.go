@@ -69,6 +69,8 @@ func TaskResult(commandResult *model.CommandResult) {
 		WorkerId:   config.GetWorkerId(),
 		BrokerId:   config.GetBrokerId(),
 		TaskId:     commandResult.TaskID,
+		TaskName:   commandResult.TaskName,
+		TaskRemark: commandResult.TaskRemark,
 		InstanceId: commandResult.InstanceID,
 		Status:     commandResult.Status,
 		Type:       commandResult.Type,

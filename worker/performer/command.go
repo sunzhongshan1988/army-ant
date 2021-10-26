@@ -13,6 +13,8 @@ import (
 func Standard(input model.Input) {
 	commandResult := &model.CommandResult{
 		TaskID:     input.TaskID,
+		TaskName:   input.TaskName,
+		TaskRemark: input.TaskRemark,
 		InstanceID: input.InstanceID,
 		Out:        "",
 		Type:       input.Type,

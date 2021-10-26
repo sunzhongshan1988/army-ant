@@ -67,10 +67,10 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		worker.BrokerId = r.BrokerId
 		worker.WorkerId = r.WorkerId
 
-		// Update task status
-		filter1 := bson.M{"worker_id": r.WorkerId, "status": 2}
+		// Update task status, if task is running(code 1) then set status as suspend(code: 3)
+		filter1 := bson.M{"worker_id": r.WorkerId, "status": 1}
 		update := bson.M{"$set": bson.M{"status": 3}}
-		_, _ = taskService.UpdateOne(filter1, update)
+		_, _ = taskService.UpdateMany(filter1, update)
 
 	} else {
 		worker.BrokerId = config.GetBrokerId()

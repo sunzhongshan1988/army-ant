@@ -15,6 +15,7 @@ type TaskRepository interface {
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error)
 	InsertOne(ctx context.Context, tr *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
+	UpdateMany(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 }
 
 type TaskMongo struct {
@@ -111,6 +112,19 @@ func (r *TaskMongo) InsertOne(ctx context.Context, worker *model.Task) (*mongo.I
 func (r *TaskMongo) UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
 
 	updateResult, err := r.Database.Collection("task").UpdateOne(ctx, filter, data)
+
+	if err != nil {
+		log.Printf("[mgdb,updateone] error:%v", err)
+	}
+
+	log.Printf("[mgdb,updateone] info: %v", updateResult.ModifiedCount)
+
+	return updateResult, err
+}
+
+func (r *TaskMongo) UpdateMany(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
+
+	updateResult, err := r.Database.Collection("task").UpdateMany(ctx, filter, data)
 
 	if err != nil {
 		log.Printf("[mgdb,updateone] error:%v", err)

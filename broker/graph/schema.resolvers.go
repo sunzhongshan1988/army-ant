@@ -190,6 +190,8 @@ func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstan
 	req := &pb.TaskRequest{
 		InstanceId: dbTask.InstanceId,
 		TaskId:     dbTask.ID.Hex(),
+		TaskName:   dbTask.Name,
+		TaskRemark: dbTask.Remark,
 		Type:       dbTask.Type,
 		Cron:       dbTask.Cron,
 		BrokerId:   dbTask.BrokerId,
