@@ -29,16 +29,16 @@ type GetWorkerItemsInput struct {
 	Size  int64 `json:"size"`
 }
 
+type OneKeyAnalyseResponse struct {
+	BrokerID string           `json:"brokerId"`
+	WorkerID string           `json:"workerId"`
+	Key      string           `json:"key"`
+	Result   []*OneKeyAnalyse `json:"result"`
+}
+
 type StdResponse struct {
 	Status int64  `json:"status"`
 	Msg    string `json:"msg"`
-}
-
-type SystemStatusResponse struct {
-	Broker     *int64 `json:"broker"`
-	Worker     *int64 `json:"worker"`
-	Task       *int64 `json:"task"`
-	TaskResult *int64 `json:"taskResult"`
 }
 
 type TaskInput struct {

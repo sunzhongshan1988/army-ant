@@ -51,8 +51,3 @@ type Mutation struct {
 	Cmd     *CommandMutation `json:"cmd"`
 	Version string           `json:"version"`
 }
-
-type AnalyseTaskStatus struct {
-	ID    int32 `bson:"_id,omitempty" json:"id"`
-	Total int32 `bson:"total,omitempty" json:"total"`
-}

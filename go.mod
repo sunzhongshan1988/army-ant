@@ -5,7 +5,6 @@ go 1.15
 require (
 	github.com/99designs/gqlgen v0.14.0
 	github.com/agnivade/levenshtein v1.1.1 // indirect
-	github.com/aws/aws-sdk-go v1.34.28 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.2.0
 	github.com/hashicorp/golang-lru v0.5.4 // indirect

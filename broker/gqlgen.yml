@@ -59,6 +59,8 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
   BrokerScalar:
     model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.BrokerScalar
+  OneKeyAnalyseScalar:
+    model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.OneKeyAnalyseScalar
   WorkerScalar:
     model: github.com/sunzhongshan1988/army-ant/broker/graph/scalar.WorkerScalar
   TaskScalar:

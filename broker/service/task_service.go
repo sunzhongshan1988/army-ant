@@ -10,7 +10,7 @@ import (
 )
 
 type TaskService interface {
-	AnalyseTaskStatus(pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error)
+	OneKeyAnalyse(pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	FindOne(filter bson.M) (*model.Task, error)
 	InsertOne(worker *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error)
@@ -19,9 +19,9 @@ type TaskService interface {
 type Task struct {
 }
 
-func (s *Task) AnalyseTaskStatus(pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error) {
+func (s *Task) OneKeyAnalyse(pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error) {
 	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
-	return taskRepo.AnalyseTaskStatus(context.TODO(), pipeline)
+	return taskRepo.OneKeyAnalyse(context.TODO(), pipeline)
 }
 
 func (s *Task) FindOne(filter bson.M) (*model.Task, error) {

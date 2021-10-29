@@ -10,7 +10,7 @@ import (
 )
 
 type TaskRepository interface {
-	AnalyseTaskStatus(ctx context.Context, pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error)
+	OneKeyAnalyse(ctx context.Context, pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.Task, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error)
 	InsertOne(ctx context.Context, tr *model.Task) (*mongo.InsertOneResult, error)
@@ -22,8 +22,8 @@ type TaskMongo struct {
 	Database *mongo.Database
 }
 
-func (r *TaskMongo) AnalyseTaskStatus(ctx context.Context, pipeline mongo.Pipeline) (*[]model.AnalyseTaskStatus, error) {
-	var result []model.AnalyseTaskStatus
+func (r *TaskMongo) OneKeyAnalyse(ctx context.Context, pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error) {
+	var result []*model.OneKeyAnalyse
 
 	cur, err := r.Database.Collection("task").Aggregate(ctx, pipeline)
 	if err == mongo.ErrNoDocuments {
@@ -39,7 +39,7 @@ func (r *TaskMongo) AnalyseTaskStatus(ctx context.Context, pipeline mongo.Pipeli
 
 	log.Printf("[mgdb, aggregate] info: %v", "success")
 
-	return &result, err
+	return result, err
 }
 
 func (r *TaskMongo) FindOne(ctx context.Context, filter bson.M) (*model.Task, error) {

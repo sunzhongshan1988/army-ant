@@ -226,14 +226,20 @@ func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstan
 	return res, nil
 }
 
-func (r *queryResolver) GetSystemStatus(ctx context.Context) (*model.SystemStatusResponse, error) {
+func (r *queryResolver) GetOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error) {
 	taskService := service.Task{}
 
 	pipeline := mongo.Pipeline{
-		{{"$group", bson.D{{"_id", "$status"}, {"total", bson.D{{"$sum", 1}}}}}},
+		{{"$group", bson.D{{"_id", key}, {"total", bson.D{{"$count", bson.D{}}}}}}},
 	}
-	_, _ = taskService.AnalyseTaskStatus(pipeline)
-	return nil, nil
+	dbRes, _ := taskService.OneKeyAnalyse(pipeline)
+	res := &model.OneKeyAnalyseResponse{
+		BrokerID: config.GetBrokerId(),
+		WorkerID: "reserve",
+		Key:      *key,
+		Result:   dbRes,
+	}
+	return res, nil
 }
 
 func (r *queryResolver) GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error) {

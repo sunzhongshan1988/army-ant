@@ -10,7 +10,7 @@ schema {
 
 # These are the two queries we will be doing
 type Query {
-  getSystemStatus: SystemStatusResponse
+  getOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
@@ -31,11 +31,11 @@ type StdResponse {
 }
 
 # Get system status
-type SystemStatusResponse {
-  broker: Int
-  worker: Int
-  task:   Int
-  taskResult: Int
+type OneKeyAnalyseResponse {
+  brokerId: String!
+  workerId: String!
+  key: String!
+  result: [OneKeyAnalyseScalar]
  }
 
 # Get broker items
@@ -108,6 +108,7 @@ input TaskInstanceInput {
 
 scalar Int32
 scalar BrokerScalar
+scalar OneKeyAnalyseScalar
 scalar WorkerScalar
 scalar TaskScalar
 scalar TaskResultScalar

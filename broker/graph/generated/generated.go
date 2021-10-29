@@ -56,9 +56,16 @@ type ComplexityRoot struct {
 		StopTask    func(childComplexity int, task *model.TaskInstanceInput) int
 	}
 
+	OneKeyAnalyseResponse struct {
+		BrokerID func(childComplexity int) int
+		Key      func(childComplexity int) int
+		Result   func(childComplexity int) int
+		WorkerID func(childComplexity int) int
+	}
+
 	Query struct {
 		GetBrokerItems     func(childComplexity int, page *model.GetBrokerItemsInput) int
-		GetSystemStatus    func(childComplexity int) int
+		GetOneKeyAnalyse   func(childComplexity int, key *string) int
 		GetTaskItems       func(childComplexity int, page *model.GetTaskItemsInput) int
 		GetTaskResultItems func(childComplexity int, page *model.GetTaskResultItemsInput) int
 		GetWorkerItems     func(childComplexity int, page *model.GetWorkerItemsInput) int
@@ -67,13 +74,6 @@ type ComplexityRoot struct {
 	StdResponse struct {
 		Msg    func(childComplexity int) int
 		Status func(childComplexity int) int
-	}
-
-	SystemStatusResponse struct {
-		Broker     func(childComplexity int) int
-		Task       func(childComplexity int) int
-		TaskResult func(childComplexity int) int
-		Worker     func(childComplexity int) int
 	}
 
 	TaskPageResponse struct {
@@ -104,7 +104,7 @@ type MutationResolver interface {
 	RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 }
 type QueryResolver interface {
-	GetSystemStatus(ctx context.Context) (*model.SystemStatusResponse, error)
+	GetOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
 	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error)
 	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 	GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error)
@@ -190,6 +190,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.StopTask(childComplexity, args["task"].(*model.TaskInstanceInput)), true
 
+	case "OneKeyAnalyseResponse.brokerId":
+		if e.complexity.OneKeyAnalyseResponse.BrokerID == nil {
+			break
+		}
+
+		return e.complexity.OneKeyAnalyseResponse.BrokerID(childComplexity), true
+
+	case "OneKeyAnalyseResponse.key":
+		if e.complexity.OneKeyAnalyseResponse.Key == nil {
+			break
+		}
+
+		return e.complexity.OneKeyAnalyseResponse.Key(childComplexity), true
+
+	case "OneKeyAnalyseResponse.result":
+		if e.complexity.OneKeyAnalyseResponse.Result == nil {
+			break
+		}
+
+		return e.complexity.OneKeyAnalyseResponse.Result(childComplexity), true
+
+	case "OneKeyAnalyseResponse.workerId":
+		if e.complexity.OneKeyAnalyseResponse.WorkerID == nil {
+			break
+		}
+
+		return e.complexity.OneKeyAnalyseResponse.WorkerID(childComplexity), true
+
 	case "Query.getBrokerItems":
 		if e.complexity.Query.GetBrokerItems == nil {
 			break
@@ -202,12 +230,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetBrokerItems(childComplexity, args["page"].(*model.GetBrokerItemsInput)), true
 
-	case "Query.getSystemStatus":
-		if e.complexity.Query.GetSystemStatus == nil {
+	case "Query.getOneKeyAnalyse":
+		if e.complexity.Query.GetOneKeyAnalyse == nil {
 			break
 		}
 
-		return e.complexity.Query.GetSystemStatus(childComplexity), true
+		args, err := ec.field_Query_getOneKeyAnalyse_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetOneKeyAnalyse(childComplexity, args["key"].(*string)), true
 
 	case "Query.getTaskItems":
 		if e.complexity.Query.GetTaskItems == nil {
@@ -258,34 +291,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.StdResponse.Status(childComplexity), true
-
-	case "SystemStatusResponse.broker":
-		if e.complexity.SystemStatusResponse.Broker == nil {
-			break
-		}
-
-		return e.complexity.SystemStatusResponse.Broker(childComplexity), true
-
-	case "SystemStatusResponse.task":
-		if e.complexity.SystemStatusResponse.Task == nil {
-			break
-		}
-
-		return e.complexity.SystemStatusResponse.Task(childComplexity), true
-
-	case "SystemStatusResponse.taskResult":
-		if e.complexity.SystemStatusResponse.TaskResult == nil {
-			break
-		}
-
-		return e.complexity.SystemStatusResponse.TaskResult(childComplexity), true
-
-	case "SystemStatusResponse.worker":
-		if e.complexity.SystemStatusResponse.Worker == nil {
-			break
-		}
-
-		return e.complexity.SystemStatusResponse.Worker(childComplexity), true
 
 	case "TaskPageResponse.current":
 		if e.complexity.TaskPageResponse.Current == nil {
@@ -447,7 +452,7 @@ schema {
 
 # These are the two queries we will be doing
 type Query {
-  getSystemStatus: SystemStatusResponse
+  getOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
@@ -468,11 +473,11 @@ type StdResponse {
 }
 
 # Get system status
-type SystemStatusResponse {
-  broker: Int
-  worker: Int
-  task:   Int
-  taskResult: Int
+type OneKeyAnalyseResponse {
+  brokerId: String!
+  workerId: String!
+  key: String!
+  result: [OneKeyAnalyseScalar]
  }
 
 # Get broker items
@@ -545,6 +550,7 @@ input TaskInstanceInput {
 
 scalar Int32
 scalar BrokerScalar
+scalar OneKeyAnalyseScalar
 scalar WorkerScalar
 scalar TaskScalar
 scalar TaskResultScalar
@@ -628,6 +634,21 @@ func (ec *executionContext) field_Query_getBrokerItems_args(ctx context.Context,
 		}
 	}
 	args["page"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getOneKeyAnalyse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["key"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["key"] = arg0
 	return args, nil
 }
 
@@ -977,7 +998,144 @@ func (ec *executionContext) _Mutation_retryTask(ctx context.Context, field graph
 	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getSystemStatus(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _OneKeyAnalyseResponse_brokerId(ctx context.Context, field graphql.CollectedField, obj *model.OneKeyAnalyseResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OneKeyAnalyseResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BrokerID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OneKeyAnalyseResponse_workerId(ctx context.Context, field graphql.CollectedField, obj *model.OneKeyAnalyseResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OneKeyAnalyseResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WorkerID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OneKeyAnalyseResponse_key(ctx context.Context, field graphql.CollectedField, obj *model.OneKeyAnalyseResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OneKeyAnalyseResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OneKeyAnalyseResponse_result(ctx context.Context, field graphql.CollectedField, obj *model.OneKeyAnalyseResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "OneKeyAnalyseResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Result, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.OneKeyAnalyse)
+	fc.Result = res
+	return ec.marshalOOneKeyAnalyseScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getOneKeyAnalyse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -993,9 +1151,16 @@ func (ec *executionContext) _Query_getSystemStatus(ctx context.Context, field gr
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getOneKeyAnalyse_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetSystemStatus(rctx)
+		return ec.resolvers.Query().GetOneKeyAnalyse(rctx, args["key"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1004,9 +1169,9 @@ func (ec *executionContext) _Query_getSystemStatus(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.SystemStatusResponse)
+	res := resTmp.(*model.OneKeyAnalyseResponse)
 	fc.Result = res
-	return ec.marshalOSystemStatusResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐSystemStatusResponse(ctx, field.Selections, res)
+	return ec.marshalOOneKeyAnalyseResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyseResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getBrokerItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1304,134 +1469,6 @@ func (ec *executionContext) _StdResponse_msg(ctx context.Context, field graphql.
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SystemStatusResponse_broker(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SystemStatusResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Broker, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SystemStatusResponse_worker(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SystemStatusResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Worker, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SystemStatusResponse_task(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SystemStatusResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Task, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SystemStatusResponse_taskResult(ctx context.Context, field graphql.CollectedField, obj *model.SystemStatusResponse) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SystemStatusResponse",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TaskResult, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int64)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TaskPageResponse_total(ctx context.Context, field graphql.CollectedField, obj *model.TaskPageResponse) (ret graphql.Marshaler) {
@@ -1980,6 +2017,41 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	res := resTmp.([]introspection.InputValue)
 	fc.Result = res
 	return ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -2934,7 +3006,10 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) unmarshalInputGetBrokerItemsInput(ctx context.Context, obj interface{}) (model.GetBrokerItemsInput, error) {
 	var it model.GetBrokerItemsInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -2962,7 +3037,10 @@ func (ec *executionContext) unmarshalInputGetBrokerItemsInput(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputGetTaskItemsInput(ctx context.Context, obj interface{}) (model.GetTaskItemsInput, error) {
 	var it model.GetTaskItemsInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -2990,7 +3068,10 @@ func (ec *executionContext) unmarshalInputGetTaskItemsInput(ctx context.Context,
 
 func (ec *executionContext) unmarshalInputGetTaskResultItemsInput(ctx context.Context, obj interface{}) (model.GetTaskResultItemsInput, error) {
 	var it model.GetTaskResultItemsInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -3018,7 +3099,10 @@ func (ec *executionContext) unmarshalInputGetTaskResultItemsInput(ctx context.Co
 
 func (ec *executionContext) unmarshalInputGetWorkerItemsInput(ctx context.Context, obj interface{}) (model.GetWorkerItemsInput, error) {
 	var it model.GetWorkerItemsInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -3046,7 +3130,10 @@ func (ec *executionContext) unmarshalInputGetWorkerItemsInput(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj interface{}) (model.TaskInput, error) {
 	var it model.TaskInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -3130,7 +3217,10 @@ func (ec *executionContext) unmarshalInputTaskInput(ctx context.Context, obj int
 
 func (ec *executionContext) unmarshalInputTaskInstanceInput(ctx context.Context, obj interface{}) (model.TaskInstanceInput, error) {
 	var it model.TaskInstanceInput
-	var asMap = obj.(map[string]interface{})
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
 
 	for k, v := range asMap {
 		switch k {
@@ -3244,6 +3334,45 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var oneKeyAnalyseResponseImplementors = []string{"OneKeyAnalyseResponse"}
+
+func (ec *executionContext) _OneKeyAnalyseResponse(ctx context.Context, sel ast.SelectionSet, obj *model.OneKeyAnalyseResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, oneKeyAnalyseResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OneKeyAnalyseResponse")
+		case "brokerId":
+			out.Values[i] = ec._OneKeyAnalyseResponse_brokerId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "workerId":
+			out.Values[i] = ec._OneKeyAnalyseResponse_workerId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "key":
+			out.Values[i] = ec._OneKeyAnalyseResponse_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "result":
+			out.Values[i] = ec._OneKeyAnalyseResponse_result(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3259,7 +3388,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getSystemStatus":
+		case "getOneKeyAnalyse":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3267,7 +3396,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getSystemStatus(ctx, field)
+				res = ec._Query_getOneKeyAnalyse(ctx, field)
 				return res
 			})
 		case "getBrokerItems":
@@ -3350,36 +3479,6 @@ func (ec *executionContext) _StdResponse(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var systemStatusResponseImplementors = []string{"SystemStatusResponse"}
-
-func (ec *executionContext) _SystemStatusResponse(ctx context.Context, sel ast.SelectionSet, obj *model.SystemStatusResponse) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, systemStatusResponseImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SystemStatusResponse")
-		case "broker":
-			out.Values[i] = ec._SystemStatusResponse_broker(ctx, field, obj)
-		case "worker":
-			out.Values[i] = ec._SystemStatusResponse_worker(ctx, field, obj)
-		case "task":
-			out.Values[i] = ec._SystemStatusResponse_task(ctx, field, obj)
-		case "taskResult":
-			out.Values[i] = ec._SystemStatusResponse_taskResult(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3533,6 +3632,11 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 			}
 		case "args":
 			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "isRepeatable":
+			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3850,6 +3954,13 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -3923,6 +4034,13 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -3972,6 +4090,13 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -4013,6 +4138,13 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -4155,19 +4287,62 @@ func (ec *executionContext) unmarshalOGetWorkerItemsInput2ᚖgithubᚗcomᚋsunz
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalInt64(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOInt2ᚖint64(ctx context.Context, sel ast.SelectionSet, v *int64) graphql.Marshaler {
+func (ec *executionContext) marshalOOneKeyAnalyseResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyseResponse(ctx context.Context, sel ast.SelectionSet, v *model.OneKeyAnalyseResponse) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt64(*v)
+	return ec._OneKeyAnalyseResponse(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOOneKeyAnalyseScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx context.Context, v interface{}) ([]*model.OneKeyAnalyse, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*model.OneKeyAnalyse, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOOneKeyAnalyseScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOOneKeyAnalyseScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx context.Context, sel ast.SelectionSet, v []*model.OneKeyAnalyse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOOneKeyAnalyseScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOOneKeyAnalyseScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx context.Context, v interface{}) (*model.OneKeyAnalyse, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := scalar.UnmarshalOneKeyAnalyseScalar(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOOneKeyAnalyseScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx context.Context, sel ast.SelectionSet, v *model.OneKeyAnalyse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return scalar.MarshalOneKeyAnalyseScalar(v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4192,13 +4367,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
-}
-
-func (ec *executionContext) marshalOSystemStatusResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐSystemStatusResponse(ctx context.Context, sel ast.SelectionSet, v *model.SystemStatusResponse) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SystemStatusResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOTaskInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInput(ctx context.Context, v interface{}) (*model.TaskInput, error) {
@@ -4428,6 +4596,13 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -4468,6 +4643,13 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -4508,6 +4690,13 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
@@ -4555,6 +4744,13 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 	}
 	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
