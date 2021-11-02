@@ -64,11 +64,11 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetBrokerItems     func(childComplexity int, page *model.GetBrokerItemsInput) int
-		GetOneKeyAnalyse   func(childComplexity int, key *string) int
-		GetTaskItems       func(childComplexity int, page *model.GetTaskItemsInput) int
-		GetTaskResultItems func(childComplexity int, page *model.GetTaskResultItemsInput) int
-		GetWorkerItems     func(childComplexity int, page *model.GetWorkerItemsInput) int
+		GetBrokerItems       func(childComplexity int, page *model.GetBrokerItemsInput) int
+		GetTaskItems         func(childComplexity int, page *model.GetTaskItemsInput) int
+		GetTaskOneKeyAnalyse func(childComplexity int, key *string) int
+		GetTaskResultItems   func(childComplexity int, page *model.GetTaskResultItemsInput) int
+		GetWorkerItems       func(childComplexity int, page *model.GetWorkerItemsInput) int
 	}
 
 	StdResponse struct {
@@ -104,7 +104,7 @@ type MutationResolver interface {
 	RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 }
 type QueryResolver interface {
-	GetOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
+	GetTaskOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
 	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error)
 	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 	GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error)
@@ -230,18 +230,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetBrokerItems(childComplexity, args["page"].(*model.GetBrokerItemsInput)), true
 
-	case "Query.getOneKeyAnalyse":
-		if e.complexity.Query.GetOneKeyAnalyse == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getOneKeyAnalyse_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetOneKeyAnalyse(childComplexity, args["key"].(*string)), true
-
 	case "Query.getTaskItems":
 		if e.complexity.Query.GetTaskItems == nil {
 			break
@@ -253,6 +241,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetTaskItems(childComplexity, args["page"].(*model.GetTaskItemsInput)), true
+
+	case "Query.getTaskOneKeyAnalyse":
+		if e.complexity.Query.GetTaskOneKeyAnalyse == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTaskOneKeyAnalyse_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTaskOneKeyAnalyse(childComplexity, args["key"].(*string)), true
 
 	case "Query.getTaskResultItems":
 		if e.complexity.Query.GetTaskResultItems == nil {
@@ -452,7 +452,7 @@ schema {
 
 # These are the two queries we will be doing
 type Query {
-  getOneKeyAnalyse(key: String): OneKeyAnalyseResponse
+  getTaskOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
@@ -637,21 +637,6 @@ func (ec *executionContext) field_Query_getBrokerItems_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getOneKeyAnalyse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["key"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["key"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_getTaskItems_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -664,6 +649,21 @@ func (ec *executionContext) field_Query_getTaskItems_args(ctx context.Context, r
 		}
 	}
 	args["page"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTaskOneKeyAnalyse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["key"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["key"] = arg0
 	return args, nil
 }
 
@@ -1135,7 +1135,7 @@ func (ec *executionContext) _OneKeyAnalyseResponse_result(ctx context.Context, f
 	return ec.marshalOOneKeyAnalyseScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyse(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getOneKeyAnalyse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getTaskOneKeyAnalyse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1152,7 +1152,7 @@ func (ec *executionContext) _Query_getOneKeyAnalyse(ctx context.Context, field g
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_getOneKeyAnalyse_args(ctx, rawArgs)
+	args, err := ec.field_Query_getTaskOneKeyAnalyse_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -1160,7 +1160,7 @@ func (ec *executionContext) _Query_getOneKeyAnalyse(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetOneKeyAnalyse(rctx, args["key"].(*string))
+		return ec.resolvers.Query().GetTaskOneKeyAnalyse(rctx, args["key"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3388,7 +3388,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getOneKeyAnalyse":
+		case "getTaskOneKeyAnalyse":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -3396,7 +3396,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getOneKeyAnalyse(ctx, field)
+				res = ec._Query_getTaskOneKeyAnalyse(ctx, field)
 				return res
 			})
 		case "getBrokerItems":

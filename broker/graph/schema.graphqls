@@ -10,7 +10,7 @@ schema {
 
 # These are the two queries we will be doing
 type Query {
-  getOneKeyAnalyse(key: String): OneKeyAnalyseResponse
+  getTaskOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
