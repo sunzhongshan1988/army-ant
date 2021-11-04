@@ -10,10 +10,16 @@ import (
 )
 
 type TaskResultService interface {
+	OneKeyAnalyse(pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	InsertOne(worker *model.TaskResult) (*mongo.InsertOneResult, error)
 }
 
 type TaskResult struct {
+}
+
+func (s *TaskResult) OneKeyAnalyse(pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error) {
+	var taskResultRepo repository.TaskResultRepository = &repository.TaskResultMongo{Database: mgdb.Database}
+	return taskResultRepo.OneKeyAnalyse(context.TODO(), pipeline)
 }
 
 func (s *TaskResult) InsertOne(tr *model.TaskResult) (*mongo.InsertOneResult, error) {

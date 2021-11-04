@@ -64,11 +64,12 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetBrokerItems       func(childComplexity int, page *model.GetBrokerItemsInput) int
-		GetTaskItems         func(childComplexity int, page *model.GetTaskItemsInput) int
-		GetTaskOneKeyAnalyse func(childComplexity int, key *string) int
-		GetTaskResultItems   func(childComplexity int, page *model.GetTaskResultItemsInput) int
-		GetWorkerItems       func(childComplexity int, page *model.GetWorkerItemsInput) int
+		GetBrokerItems             func(childComplexity int, page *model.GetBrokerItemsInput) int
+		GetTaskItems               func(childComplexity int, page *model.GetTaskItemsInput) int
+		GetTaskOneKeyAnalyse       func(childComplexity int, key *string) int
+		GetTaskResultItems         func(childComplexity int, page *model.GetTaskResultItemsInput) int
+		GetTaskResultOneKeyAnalyse func(childComplexity int, key *string) int
+		GetWorkerItems             func(childComplexity int, page *model.GetWorkerItemsInput) int
 	}
 
 	StdResponse struct {
@@ -105,6 +106,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetTaskOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
+	GetTaskResultOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
 	GetBrokerItems(ctx context.Context, page *model.GetBrokerItemsInput) (*model.BrokerPageResponse, error)
 	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 	GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error)
@@ -265,6 +267,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetTaskResultItems(childComplexity, args["page"].(*model.GetTaskResultItemsInput)), true
+
+	case "Query.getTaskResultOneKeyAnalyse":
+		if e.complexity.Query.GetTaskResultOneKeyAnalyse == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getTaskResultOneKeyAnalyse_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetTaskResultOneKeyAnalyse(childComplexity, args["key"].(*string)), true
 
 	case "Query.getWorkerItems":
 		if e.complexity.Query.GetWorkerItems == nil {
@@ -453,6 +467,7 @@ schema {
 # These are the two queries we will be doing
 type Query {
   getTaskOneKeyAnalyse(key: String): OneKeyAnalyseResponse
+  getTaskResultOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
@@ -679,6 +694,21 @@ func (ec *executionContext) field_Query_getTaskResultItems_args(ctx context.Cont
 		}
 	}
 	args["page"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getTaskResultOneKeyAnalyse_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["key"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["key"] = arg0
 	return args, nil
 }
 
@@ -1161,6 +1191,45 @@ func (ec *executionContext) _Query_getTaskOneKeyAnalyse(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().GetTaskOneKeyAnalyse(rctx, args["key"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.OneKeyAnalyseResponse)
+	fc.Result = res
+	return ec.marshalOOneKeyAnalyseResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐOneKeyAnalyseResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getTaskResultOneKeyAnalyse(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getTaskResultOneKeyAnalyse_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetTaskResultOneKeyAnalyse(rctx, args["key"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3397,6 +3466,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getTaskOneKeyAnalyse(ctx, field)
+				return res
+			})
+		case "getTaskResultOneKeyAnalyse":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getTaskResultOneKeyAnalyse(ctx, field)
 				return res
 			})
 		case "getBrokerItems":

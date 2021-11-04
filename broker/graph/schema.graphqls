@@ -11,6 +11,7 @@ schema {
 # These are the two queries we will be doing
 type Query {
   getTaskOneKeyAnalyse(key: String): OneKeyAnalyseResponse
+  getTaskResultOneKeyAnalyse(key: String): OneKeyAnalyseResponse
   getBrokerItems(page: GetBrokerItemsInput): BrokerPageResponse
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse

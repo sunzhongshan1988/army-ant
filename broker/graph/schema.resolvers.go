@@ -7,7 +7,6 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 
 	"github.com/golang/protobuf/ptypes"
@@ -19,6 +18,7 @@ import (
 	pb "github.com/sunzhongshan1988/army-ant/proto/service"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error) {
@@ -233,6 +233,22 @@ func (r *queryResolver) GetTaskOneKeyAnalyse(ctx context.Context, key *string) (
 		{{"$group", bson.D{{"_id", key}, {"total", bson.D{{"$count", bson.D{}}}}}}},
 	}
 	dbRes, _ := taskService.OneKeyAnalyse(pipeline)
+	res := &model.OneKeyAnalyseResponse{
+		BrokerID: config.GetBrokerId(),
+		WorkerID: "reserve",
+		Key:      *key,
+		Result:   dbRes,
+	}
+	return res, nil
+}
+
+func (r *queryResolver) GetTaskResultOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error) {
+	taskResultService := service.TaskResult{}
+
+	pipeline := mongo.Pipeline{
+		{{"$group", bson.D{{"_id", key}, {"total", bson.D{{"$count", bson.D{}}}}}}},
+	}
+	dbRes, _ := taskResultService.OneKeyAnalyse(pipeline)
 	res := &model.OneKeyAnalyseResponse{
 		BrokerID: config.GetBrokerId(),
 		WorkerID: "reserve",
