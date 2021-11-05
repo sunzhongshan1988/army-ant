@@ -5,6 +5,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// Worker Status: 0 - stateless, 1 - online, 2 - offline
 type Worker struct {
 	ID          primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	BrokerId    string                 `bson:"broker_id,omitempty" json:"brokerId"`
@@ -12,6 +13,7 @@ type Worker struct {
 	WorkerId    string                 `bson:"worker_id,omitempty" json:"workerId"`
 	WorkerLink  string                 `bson:"worker_link,omitempty" json:"workerLink"`
 	WorkerLabel string                 `bson:"worker_label,omitempty" json:"workerLable"`
+	Status      int64                  `bson:"status,omitempty" json:"status"`
 	CreateAt    *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
 	UpdateAt    *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`
 }

@@ -11,6 +11,7 @@ import (
 
 type WorkerService interface {
 	InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error)
+	UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 	/*
 	*@filter primitive.ObjectIDFromHex("60acb63ad1b5adedd2da8766")
 	 */
@@ -23,6 +24,11 @@ type Worker struct {
 func (s *Worker) InsertOne(worker *model.Worker) (*mongo.InsertOneResult, error) {
 	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Database: mgdb.Database}
 	return workerRepo.InsertOne(context.TODO(), worker)
+}
+
+func (s *Worker) UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
+	var workerRepo repository.WorkerRepository = &repository.WorkerMongo{Database: mgdb.Database}
+	return workerRepo.UpdateOne(context.TODO(), filter, data)
 }
 
 func (s *Worker) FindOne(filter bson.M) (*model.Worker, error) {

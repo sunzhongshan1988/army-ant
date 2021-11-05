@@ -11,6 +11,7 @@ import (
 
 type WorkerRepository interface {
 	InsertOne(ctx context.Context, worker *model.Worker) (*mongo.InsertOneResult, error)
+	UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.Worker, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.WorkerItemsPage, error)
 }
@@ -29,6 +30,19 @@ func (r *WorkerMongo) InsertOne(ctx context.Context, worker *model.Worker) (*mon
 	log.Printf("[mgdb,save]: %v", insertResult.InsertedID)
 
 	return insertResult, err
+}
+
+func (r *WorkerMongo) UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
+
+	updateResult, err := r.Database.Collection("worker").UpdateOne(ctx, filter, data)
+
+	if err != nil {
+		log.Printf("[mgdb,updateone] error:%v", err)
+	}
+
+	log.Printf("[mgdb,updateone] info: %v", updateResult.ModifiedCount)
+
+	return updateResult, err
 }
 
 func (r *WorkerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Worker, error) {

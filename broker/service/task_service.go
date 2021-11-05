@@ -34,9 +34,9 @@ func (s *Task) FindAll(filter bson.M, page *model.PageableRequest) (*model.TaskI
 	return taskRepo.FindAll(context.TODO(), filter, page)
 }
 
-func (s *Task) InsertOne(tr *model.Task) (*mongo.InsertOneResult, error) {
+func (s *Task) InsertOne(task *model.Task) (*mongo.InsertOneResult, error) {
 	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}
-	return taskRepo.InsertOne(context.TODO(), tr)
+	return taskRepo.InsertOne(context.TODO(), task)
 }
 func (s *Task) UpdateOne(filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
 	var taskRepo repository.TaskRepository = &repository.TaskMongo{Database: mgdb.Database}

@@ -11,6 +11,7 @@ import (
 
 type BrokerRepository interface {
 	InsertOne(ctx context.Context, worker *model.Broker) (*mongo.InsertOneResult, error)
+	UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.Broker, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.BrokerItemsPage, error)
 }
@@ -29,6 +30,19 @@ func (r *BrokerMongo) InsertOne(ctx context.Context, broker *model.Broker) (*mon
 	log.Printf("[mongodb, save] info: %v", insertResult.InsertedID)
 
 	return insertResult, err
+}
+
+func (r *BrokerMongo) UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error) {
+
+	updateResult, err := r.Database.Collection("broker").UpdateOne(ctx, filter, data)
+
+	if err != nil {
+		log.Printf("[mgdb,updateone] error:%v", err)
+	}
+
+	log.Printf("[mgdb,updateone] info: %v", updateResult.ModifiedCount)
+
+	return updateResult, err
 }
 
 func (r *BrokerMongo) FindOne(ctx context.Context, filter bson.M) (*model.Broker, error) {

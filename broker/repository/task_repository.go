@@ -13,7 +13,7 @@ type TaskRepository interface {
 	OneKeyAnalyse(ctx context.Context, pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	FindOne(ctx context.Context, filter bson.M) (*model.Task, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskItemsPage, error)
-	InsertOne(ctx context.Context, tr *model.Task) (*mongo.InsertOneResult, error)
+	InsertOne(ctx context.Context, task *model.Task) (*mongo.InsertOneResult, error)
 	UpdateOne(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 	UpdateMany(ctx context.Context, filter bson.M, data bson.M) (*mongo.UpdateResult, error)
 }
@@ -96,9 +96,9 @@ func (r *TaskMongo) FindAll(ctx context.Context, filter bson.M, page *model.Page
 	return &result, err
 }
 
-func (r *TaskMongo) InsertOne(ctx context.Context, worker *model.Task) (*mongo.InsertOneResult, error) {
+func (r *TaskMongo) InsertOne(ctx context.Context, task *model.Task) (*mongo.InsertOneResult, error) {
 
-	insertResult, err := r.Database.Collection("task").InsertOne(ctx, worker)
+	insertResult, err := r.Database.Collection("task").InsertOne(ctx, task)
 
 	if err != nil {
 		log.Printf("[mgdb,save] error:%v", err)

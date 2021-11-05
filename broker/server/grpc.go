@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/google/uuid"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/model"
@@ -11,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"net"
 
@@ -56,8 +56,9 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		WorkerId:    "",
 		WorkerLink:  in.WorkerLink,
 		WorkerLabel: in.WorkerLabel,
+		Status:      1,
 		CreateAt:    in.CreateAt,
-		UpdateAt:    ptypes.TimestampNow(),
+		UpdateAt:    timestamppb.Now(),
 	}
 
 	// Query Database
@@ -69,8 +70,13 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 
 		// Update task status, if task is running(code 1) then set status as suspend(code: 3)
 		filter1 := bson.M{"worker_id": r.WorkerId, "status": 1}
-		update := bson.M{"$set": bson.M{"status": 3}}
-		_, _ = taskService.UpdateMany(filter1, update)
+		update1 := bson.M{"$set": bson.M{"status": 3}}
+		_, _ = taskService.UpdateMany(filter1, update1)
+
+		// Update worker status and update time
+		filter2 := bson.M{"worker_id": r.WorkerId}
+		update2 := bson.M{"$set": bson.M{"status": 1, "update_at": worker.UpdateAt}}
+		_, _ = workerService.UpdateOne(filter2, update2)
 
 	} else {
 		worker.BrokerId = config.GetBrokerId()
