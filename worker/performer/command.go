@@ -1,9 +1,9 @@
 package performer
 
 import (
-	"github.com/golang/protobuf/ptypes"
 	"github.com/sunzhongshan1988/army-ant/worker/grpc"
 	"github.com/sunzhongshan1988/army-ant/worker/model"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,7 +19,7 @@ func Standard(input model.Input) {
 		Out:        "",
 		Type:       input.Type,
 		Status:     0,
-		StartAt:    ptypes.TimestampNow(),
+		StartAt:    timestamppb.Now(),
 		EndAt:      nil,
 	}
 
@@ -30,12 +30,14 @@ func Standard(input model.Input) {
 	stdout, errSo := cmd.StdoutPipe()
 	if errSo != nil {
 		commandResult.Status = 1
+		commandResult.Out = errSo.Error()
 		log.Printf("[command,stdoutpipe] error: %s", errSo)
 	}
 
 	stderr, errSe := cmd.StderrPipe()
 	if errSe != nil {
 		commandResult.Status = 1
+		commandResult.Out = errSe.Error()
 		log.Printf("[command,stderrpipe] error: %s", errSe)
 	}
 
@@ -53,11 +55,12 @@ func Standard(input model.Input) {
 
 	if errWt := cmd.Wait(); errWt != nil {
 		commandResult.Status = 1
+		commandResult.Out = errWt.Error()
 		log.Printf("[command,wait] error: %s", errWt)
 	}
 
 	log.Printf("[command,out] info: %v", commandResult.Out)
 
-	commandResult.EndAt = ptypes.TimestampNow()
+	commandResult.EndAt = timestamppb.Now()
 	grpc.TaskResult(commandResult)
 }

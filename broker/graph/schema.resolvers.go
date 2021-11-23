@@ -7,9 +7,9 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/sunzhongshan1988/army-ant/broker/config"
 	"github.com/sunzhongshan1988/army-ant/broker/graph/generated"
 	"github.com/sunzhongshan1988/army-ant/broker/grpc"
@@ -86,8 +86,8 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 			DNA:        task.Dna,
 			Mutation:   task.Mutation,
 			Remark:     task.Remark,
-			CreateAt:   ptypes.TimestampNow(),
-			UpdateAt:   ptypes.TimestampNow(),
+			CreateAt:   timestamppb.Now(),
+			UpdateAt:   timestamppb.Now(),
 		}
 
 		taskService := service.Task{}

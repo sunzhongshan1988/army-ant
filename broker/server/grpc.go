@@ -135,7 +135,7 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 	}
 
 	// Update task status
-	if in.Type == 0 {
+	if in.Type == 0 || in.Type == 2 {
 		filter1 := bson.M{"_id": taskObjID}
 		update := bson.M{"$set": bson.M{"status": 2}}
 		_, err2 := taskService.UpdateOne(filter1, update)

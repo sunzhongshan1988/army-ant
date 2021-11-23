@@ -3,10 +3,10 @@ package grpc
 import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/sunzhongshan1988/army-ant/worker/config"
 	"github.com/sunzhongshan1988/army-ant/worker/model"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 	"time"
 
@@ -32,7 +32,7 @@ func Register() {
 		WorkerLink:  config.GetWorkerLink(),
 		Content:     "",
 		WorkerLabel: config.GetLabel(),
-		CreateAt:    ptypes.TimestampNow(),
+		CreateAt:    timestamppb.Now(),
 	}
 
 	r, err2 := c.WorkerRegister(ctx, request)

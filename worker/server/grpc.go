@@ -73,6 +73,8 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 		res.Status = 0
 		res.EntryId = int32(entryId)
 		res.Msg = "ok"
+	case 2:
+		go pf.Standard(*input)
 
 	}
 
