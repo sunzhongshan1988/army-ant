@@ -11,6 +11,7 @@ type Broker struct {
 	BrokerId    string                 `bson:"broker_id,omitempty" json:"brokerId"`
 	BrokerLink  string                 `bson:"broker_link,omitempty" json:"brokerLink"`
 	BrokerLabel string                 `bson:"broker_label,omitempty" json:"brokerLabel"`
+	Version     string                 `bson:"version,omitempty" json:"version"`
 	Status      int64                  `bson:"status,omitempty" json:"status"`
 	CreateAt    *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
 	UpdateAt    *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`

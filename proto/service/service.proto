@@ -34,7 +34,8 @@ message RegisterRequest {
   string content = 8;
   string worker_link = 10;
   string worker_label = 11;
-  google.protobuf.Timestamp create_at = 12;
+  string worker_version = 14;
+  google.protobuf.Timestamp create_at = 16;
 }
 message RegisterResponse {
   string broker_id = 1;

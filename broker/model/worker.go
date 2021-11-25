@@ -13,6 +13,7 @@ type Worker struct {
 	WorkerId    string                 `bson:"worker_id,omitempty" json:"workerId"`
 	WorkerLink  string                 `bson:"worker_link,omitempty" json:"workerLink"`
 	WorkerLabel string                 `bson:"worker_label,omitempty" json:"workerLable"`
+	Version     string                 `bson:"version,omitempty" json:"version"`
 	Status      int64                  `bson:"status,omitempty" json:"status"`
 	CreateAt    *timestamppb.Timestamp `bson:"create_at" json:"createAt"`
 	UpdateAt    *timestamppb.Timestamp `bson:"update_at" json:"updateAt"`

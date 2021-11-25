@@ -27,12 +27,13 @@ func Register() {
 	defer cancel()
 
 	request := &pb.RegisterRequest{
-		Auth:        "#shdk687dHHhiJHDHDHH",
-		WorkerType:  pb.WorkerType_IDC,
-		WorkerLink:  config.GetWorkerLink(),
-		Content:     "",
-		WorkerLabel: config.GetLabel(),
-		CreateAt:    timestamppb.Now(),
+		Auth:          "#shdk687dHHhiJHDHDHH",
+		WorkerType:    pb.WorkerType_IDC,
+		WorkerLink:    config.GetWorkerLink(),
+		Content:       "",
+		WorkerLabel:   config.GetLabel(),
+		WorkerVersion: config.GetVersion(),
+		CreateAt:      timestamppb.Now(),
 	}
 
 	r, err2 := c.WorkerRegister(ctx, request)

@@ -56,6 +56,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 		WorkerId:    "",
 		WorkerLink:  in.WorkerLink,
 		WorkerLabel: in.WorkerLabel,
+		Version:     in.WorkerVersion,
 		Status:      1,
 		CreateAt:    in.CreateAt,
 		UpdateAt:    timestamppb.Now(),
@@ -75,7 +76,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 
 		// Update worker status and update time
 		filter2 := bson.M{"worker_id": r.WorkerId}
-		update2 := bson.M{"$set": bson.M{"status": 1, "update_at": worker.UpdateAt}}
+		update2 := bson.M{"$set": bson.M{"status": 1, "update_at": worker.UpdateAt, "version": worker.Version}}
 		_, _ = workerService.UpdateOne(filter2, update2)
 
 	} else {

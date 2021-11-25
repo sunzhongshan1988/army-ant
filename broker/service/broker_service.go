@@ -52,7 +52,7 @@ func (s *Broker) Register() {
 	if r != nil {
 		config.SetBrokerId(r.BrokerId)
 		filter1 := bson.M{"broker_id": r.BrokerId}
-		update := bson.M{"$set": bson.M{"status": 1, "update_at": timestamppb.Now()}}
+		update := bson.M{"$set": bson.M{"status": 1, "update_at": timestamppb.Now(), "version": config.GetVersion()}}
 		_, _ = s.UpdateOne(filter1, update)
 	} else {
 		config.SetBrokerId(uuid.New().String())
@@ -61,6 +61,7 @@ func (s *Broker) Register() {
 			BrokerId:    config.GetBrokerId(),
 			BrokerLink:  config.GetGrpcLink(),
 			BrokerLabel: config.GetBrokerLabel(),
+			Version:     config.GetVersion(),
 			Status:      1,
 			CreateAt:    timestamppb.Now(),
 			UpdateAt:    timestamppb.Now(),
