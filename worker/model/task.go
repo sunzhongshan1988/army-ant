@@ -21,7 +21,8 @@ type CommandResult struct {
 	TaskName   string
 	TaskRemark string
 	InstanceID string
-	Out        string
+	Output     string
+	Error      string
 	Type       int64
 	Status     int32
 	StartAt    *timestamp.Timestamp

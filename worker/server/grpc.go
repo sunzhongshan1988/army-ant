@@ -75,7 +75,8 @@ func (s *server) Task(ctx context.Context, in *pb.TaskRequest) (*pb.TaskResponse
 		res.Msg = "ok"
 	case 2:
 		go pf.Standard(*input)
-
+	case 3:
+		go pf.Standard(*input)
 	}
 
 	return res, nil
@@ -96,6 +97,28 @@ func (s *server) StopTask(ctx context.Context, in *pb.StopTaskRequest) (*pb.Stop
 	}
 
 	cronmod.Remove(cron.EntryID(in.EntryId))
+
+	return res, nil
+}
+
+// KillTask implements KillTask.GreeterServer
+func (s *server) KillTask(ctx context.Context, in *pb.KillTaskRequest) (*pb.KillTaskResponse, error) {
+	m := jsonpb.Marshaler{
+		EmitDefaults: true,
+		OrigName:     true,
+	}
+	jsonStr, _ := m.MarshalToString(in)
+	log.Printf("[grpc, killtask] info: %v", jsonStr)
+
+	res := &pb.KillTaskResponse{
+		Status: 1,
+		Msg:    "ok",
+	}
+
+	if ok := pf.Kill(in.TaskId); !ok {
+		res.Status = 2
+		res.Msg = "task not running"
+	}
 
 	return res, nil
 }

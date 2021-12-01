@@ -4,9 +4,9 @@
 
 
 # graphql
-1.update ./broker/graph/schema.graphqls, in this path:
+1.update ./broker/graph/schema.graphqls, in path ./broker:
 
-` go generate`
+`go run github.com/99designs/gqlgen generate`
 
 #Build
 ## Change Target OS

@@ -6,7 +6,7 @@ import (
 )
 
 // Task Status 	0 - null, 1 - running, 2 - finish, 3 - suspend
-// Task Type 	0 - manual, 1 - crontab
+// Task Type 	0 - manual, 1 - crontab, 2 - app, 3 - persistence
 type Task struct {
 	ID         primitive.ObjectID     `bson:"_id,omitempty" json:"id"`
 	Name       string                 `bson:"name,omitempty" json:"name"`

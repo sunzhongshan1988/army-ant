@@ -23,6 +23,7 @@ type Mutation {
   receive_task(task: TaskInput): StdResponse!
   stopTask(task: TaskInstanceInput): StdResponse!
   retryTask(task: TaskInstanceInput): StdResponse!
+  killTask(task: TaskInstanceInput): StdResponse!
 }
 
 # just a input type for our mutation

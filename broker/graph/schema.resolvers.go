@@ -7,7 +7,6 @@ import (
 	"context"
 	b64 "encoding/base64"
 	"encoding/json"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"log"
 
 	"github.com/sunzhongshan1988/army-ant/broker/config"
@@ -19,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error) {
@@ -223,6 +223,51 @@ func (r *mutationResolver) RetryTask(ctx context.Context, task *model.TaskInstan
 
 	res.Status = 0
 	res.Msg = "ok"
+	return res, nil
+}
+
+func (r *mutationResolver) KillTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error) {
+	jsonStr, _ := json.Marshal(task)
+	log.Printf("[graphql, killtask] info: %v", string(jsonStr))
+
+	res := &model.StdResponse{
+		Status: 1,
+		Msg:    "error",
+	}
+
+	req := &pb.KillTaskRequest{
+		TaskId:     task.TaskID,
+		BrokerId:   task.BrokerID,
+		WorkerId:   "",
+		InstanceId: "",
+	}
+
+	taskObjID, _ := primitive.ObjectIDFromHex(task.TaskID)
+	filter := bson.M{"_id": taskObjID, "status": 1}
+	taskService := service.Task{}
+	dbtask, err := taskService.FindOne(filter)
+	if err != nil {
+		res.Msg = "query db error"
+		return res, err
+	}
+	req.WorkerId = dbtask.WorkerId
+	req.InstanceId = dbtask.InstanceId
+	grpcRes, err1 := grpc.KillTask(req)
+	if err1 != nil {
+		res.Msg = "send to worker error"
+		return res, err1
+	}
+
+	filter1 := bson.M{"_id": dbtask.ID}
+	update := bson.M{"$set": bson.M{"status": 2}}
+	_, err2 := taskService.UpdateOne(filter1, update)
+	if err2 != nil {
+		res.Msg = "update db error"
+		return res, err
+	}
+
+	res.Status = 0
+	res.Msg = grpcRes.Msg
 	return res, nil
 }
 

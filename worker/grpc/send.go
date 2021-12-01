@@ -75,7 +75,8 @@ func TaskResult(commandResult *model.CommandResult) {
 		InstanceId: commandResult.InstanceID,
 		Status:     commandResult.Status,
 		Type:       commandResult.Type,
-		Result:     commandResult.Out,
+		Error:      commandResult.Error,
+		Output:     commandResult.Output,
 		StartAt:    commandResult.StartAt,
 		EndAt:      commandResult.EndAt,
 	}

@@ -51,6 +51,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		KillTask    func(childComplexity int, task *model.TaskInstanceInput) int
 		ReceiveTask func(childComplexity int, task *model.TaskInput) int
 		RetryTask   func(childComplexity int, task *model.TaskInstanceInput) int
 		StopTask    func(childComplexity int, task *model.TaskInstanceInput) int
@@ -103,6 +104,7 @@ type MutationResolver interface {
 	ReceiveTask(ctx context.Context, task *model.TaskInput) (*model.StdResponse, error)
 	StopTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 	RetryTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
+	KillTask(ctx context.Context, task *model.TaskInstanceInput) (*model.StdResponse, error)
 }
 type QueryResolver interface {
 	GetTaskOneKeyAnalyse(ctx context.Context, key *string) (*model.OneKeyAnalyseResponse, error)
@@ -155,6 +157,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BrokerPageResponse.Total(childComplexity), true
+
+	case "Mutation.killTask":
+		if e.complexity.Mutation.KillTask == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_killTask_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.KillTask(childComplexity, args["task"].(*model.TaskInstanceInput)), true
 
 	case "Mutation.receive_task":
 		if e.complexity.Mutation.ReceiveTask == nil {
@@ -479,6 +493,7 @@ type Mutation {
   receive_task(task: TaskInput): StdResponse!
   stopTask(task: TaskInstanceInput): StdResponse!
   retryTask(task: TaskInstanceInput): StdResponse!
+  killTask(task: TaskInstanceInput): StdResponse!
 }
 
 # just a input type for our mutation
@@ -576,6 +591,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_killTask_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.TaskInstanceInput
+	if tmp, ok := rawArgs["task"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("task"))
+		arg0, err = ec.unmarshalOTaskInstanceInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskInstanceInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["task"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_receive_task_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1012,6 +1042,48 @@ func (ec *executionContext) _Mutation_retryTask(ctx context.Context, field graph
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().RetryTask(rctx, args["task"].(*model.TaskInstanceInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.StdResponse)
+	fc.Result = res
+	return ec.marshalNStdResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐStdResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_killTask(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_killTask_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().KillTask(rctx, args["task"].(*model.TaskInstanceInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3389,6 +3461,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "retryTask":
 			out.Values[i] = ec._Mutation_retryTask(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "killTask":
+			out.Values[i] = ec._Mutation_killTask(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

@@ -17,6 +17,7 @@ service Greeter {
 
   // Worker server
   rpc Task (TaskRequest) returns (TaskResponse) {}
+  rpc KillTask (KillTaskRequest) returns (KillTaskResponse) {}
   rpc StopTask (StopTaskRequest) returns (StopTaskResponse) {}
 }
 
@@ -56,9 +57,10 @@ message TaskResultRequest {
   string  worker_id = 10;
   int32   status = 11;
   int64   type = 12;
-  string  result = 13;
-  google.protobuf.Timestamp start_at = 14;
-  google.protobuf.Timestamp end_at = 16;
+  string  error = 13;
+  string  output = 15;
+  google.protobuf.Timestamp start_at = 16;
+  google.protobuf.Timestamp end_at = 19;
 }
 message TaskResultResponse {
   int32 code = 10;
@@ -97,7 +99,7 @@ message TaskResponse {
 }
 
 /**
-* Stop Task
+* Stop task schedule
  */
 message StopTaskRequest {
   string id = 10;
@@ -106,6 +108,20 @@ message StopTaskRequest {
   int32  entry_id = 18;
 }
 message StopTaskResponse {
+  int32   status = 10;
+  string  msg = 12;
+}
+
+/**
+* Kill task schedule
+ */
+message KillTaskRequest {
+  string task_id = 10;
+  string instance_id = 12;
+  string broker_id = 14;
+  string worker_id = 16;
+}
+message KillTaskResponse {
   int32   status = 10;
   string  msg = 12;
 }

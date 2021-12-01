@@ -96,3 +96,51 @@ func StopTask(request *pb.StopTaskRequest) (*pb.StopTaskResponse, error) {
 	return r, nil
 
 }
+
+func KillTask(request *pb.KillTaskRequest) (*pb.KillTaskResponse, error) {
+	workerService := service.Worker{}
+
+	res := &pb.KillTaskResponse{
+		Status: 0,
+		Msg:    "ok",
+	}
+
+	filter := bson.M{"worker_id": request.WorkerId}
+	worker, err := workerService.FindOne(filter)
+	if err != nil {
+		log.Printf("[grpc, killtask] error: %v", err)
+		res.Msg = "db error"
+		return res, err
+	}
+
+	// Set up a connection to the worker.
+	conn, err1 := grpc.Dial(worker.WorkerLink, grpc.WithInsecure(), grpc.WithBlock())
+	if err1 != nil {
+		log.Printf("[grpc, killtask] error: %v", err1)
+		res.Msg = "connect worker error"
+		return res, err1
+	}
+	defer conn.Close()
+	c := pb.NewGreeterClient(conn)
+
+	// Contact the worker and print out its response.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	r, err2 := c.KillTask(ctx, request)
+	if err2 != nil {
+		log.Printf("[grpc, killtask] error: %v", err2)
+		res.Msg = "send task error"
+		return res, err2
+	}
+
+	m := jsonpb.Marshaler{
+		EmitDefaults: true,
+		OrigName:     true,
+	}
+	jsonStr, _ := m.MarshalToString(r)
+	log.Printf("[grpc, killtask] info: %v", jsonStr)
+
+	return r, nil
+
+}

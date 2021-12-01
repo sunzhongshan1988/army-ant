@@ -124,7 +124,8 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 		WorkerId:   in.WorkerId,
 		Type:       in.Type,
 		Status:     in.Status,
-		Result:     in.Result,
+		Error:      in.Error,
+		Output:     in.Output,
 		StartAt:    in.StartAt,
 		EndAt:      in.EndAt,
 	}

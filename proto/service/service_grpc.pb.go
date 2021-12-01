@@ -23,6 +23,7 @@ type GreeterClient interface {
 	TaskResult(ctx context.Context, in *TaskResultRequest, opts ...grpc.CallOption) (*TaskResultResponse, error)
 	// Worker server
 	Task(ctx context.Context, in *TaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	KillTask(ctx context.Context, in *KillTaskRequest, opts ...grpc.CallOption) (*KillTaskResponse, error)
 	StopTask(ctx context.Context, in *StopTaskRequest, opts ...grpc.CallOption) (*StopTaskResponse, error)
 }
 
@@ -61,6 +62,15 @@ func (c *greeterClient) Task(ctx context.Context, in *TaskRequest, opts ...grpc.
 	return out, nil
 }
 
+func (c *greeterClient) KillTask(ctx context.Context, in *KillTaskRequest, opts ...grpc.CallOption) (*KillTaskResponse, error) {
+	out := new(KillTaskResponse)
+	err := c.cc.Invoke(ctx, "/grpc.Greeter/KillTask", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *greeterClient) StopTask(ctx context.Context, in *StopTaskRequest, opts ...grpc.CallOption) (*StopTaskResponse, error) {
 	out := new(StopTaskResponse)
 	err := c.cc.Invoke(ctx, "/grpc.Greeter/StopTask", in, out, opts...)
@@ -79,6 +89,7 @@ type GreeterServer interface {
 	TaskResult(context.Context, *TaskResultRequest) (*TaskResultResponse, error)
 	// Worker server
 	Task(context.Context, *TaskRequest) (*TaskResponse, error)
+	KillTask(context.Context, *KillTaskRequest) (*KillTaskResponse, error)
 	StopTask(context.Context, *StopTaskRequest) (*StopTaskResponse, error)
 	mustEmbedUnimplementedGreeterServer()
 }
@@ -95,6 +106,9 @@ func (UnimplementedGreeterServer) TaskResult(context.Context, *TaskResultRequest
 }
 func (UnimplementedGreeterServer) Task(context.Context, *TaskRequest) (*TaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Task not implemented")
+}
+func (UnimplementedGreeterServer) KillTask(context.Context, *KillTaskRequest) (*KillTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KillTask not implemented")
 }
 func (UnimplementedGreeterServer) StopTask(context.Context, *StopTaskRequest) (*StopTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StopTask not implemented")
@@ -166,6 +180,24 @@ func _Greeter_Task_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Greeter_KillTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KillTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreeterServer).KillTask(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpc.Greeter/KillTask",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreeterServer).KillTask(ctx, req.(*KillTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Greeter_StopTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(StopTaskRequest)
 	if err := dec(in); err != nil {
@@ -202,6 +234,10 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Task",
 			Handler:    _Greeter_Task_Handler,
+		},
+		{
+			MethodName: "KillTask",
+			Handler:    _Greeter_KillTask_Handler,
 		},
 		{
 			MethodName: "StopTask",
