@@ -22,6 +22,7 @@ func Standard(input model.Input) {
 		Output:     "",
 		Type:       input.Type,
 		Status:     0,
+		Duration:   0,
 		StartAt:    timestamppb.Now(),
 		EndAt:      nil,
 	}
@@ -67,6 +68,8 @@ func Standard(input model.Input) {
 	log.Printf("[command,out] info: %v", commandResult.Output)
 
 	commandResult.EndAt = timestamppb.Now()
+	commandResult.Duration = commandResult.EndAt.Seconds - commandResult.StartAt.Seconds
+
 	grpc.TaskResult(commandResult)
 }
 

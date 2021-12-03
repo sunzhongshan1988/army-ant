@@ -126,6 +126,7 @@ func (s *server) TaskResult(ctx context.Context, in *pb.TaskResultRequest) (*pb.
 		Status:     in.Status,
 		Error:      in.Error,
 		Output:     in.Output,
+		Duration:   in.Duration,
 		StartAt:    in.StartAt,
 		EndAt:      in.EndAt,
 	}

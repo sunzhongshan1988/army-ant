@@ -25,6 +25,7 @@ type CommandResult struct {
 	Error      string
 	Type       int64
 	Status     int32
+	Duration   int64
 	StartAt    *timestamp.Timestamp
 	EndAt      *timestamp.Timestamp
 }

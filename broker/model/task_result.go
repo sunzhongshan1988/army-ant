@@ -18,6 +18,7 @@ type TaskResult struct {
 	Type       int64                  `bson:"type,omitempty" json:"type"`
 	Error      string                 `bson:"error,omitempty" json:"error"`
 	Output     string                 `bson:"output,omitempty" json:"output"`
+	Duration   int64                  `bson:"duration,omitempty" json:"duration"`
 	StartAt    *timestamppb.Timestamp `bson:"start_at" json:"startAt"`
 	EndAt      *timestamppb.Timestamp `bson:"end_at" json:"endAt"`
 }

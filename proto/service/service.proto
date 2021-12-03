@@ -59,7 +59,8 @@ message TaskResultRequest {
   int64   type = 12;
   string  error = 13;
   string  output = 15;
-  google.protobuf.Timestamp start_at = 16;
+  int64   duration = 16;
+  google.protobuf.Timestamp start_at = 18;
   google.protobuf.Timestamp end_at = 19;
 }
 message TaskResultResponse {
