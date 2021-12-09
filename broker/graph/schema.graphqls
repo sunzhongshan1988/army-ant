@@ -16,6 +16,7 @@ type Query {
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
   getTaskResultItems(page: GetTaskResultItemsInput): TaskResultPageResponse
+  getLatestTaskResult(taskId: String): GetLatestTaskResultResponse
  }
 
 # This is a mutation we will be doing
@@ -86,6 +87,10 @@ type TaskResultPageResponse {
   pageSize: Int!
   current: Int!
   items: [TaskResultScalar]
+}
+
+type GetLatestTaskResultResponse {
+  taskResult: TaskResultScalar
 }
 
 # receive a task

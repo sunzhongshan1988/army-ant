@@ -14,6 +14,10 @@ type GetBrokerItemsInput struct {
 	Size  int64 `json:"size"`
 }
 
+type GetLatestTaskResultResponse struct {
+	TaskResult *TaskResult `json:"taskResult"`
+}
+
 type GetTaskItemsInput struct {
 	Index int64 `json:"index"`
 	Size  int64 `json:"size"`

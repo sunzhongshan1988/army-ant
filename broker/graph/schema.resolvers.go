@@ -70,34 +70,33 @@ func (r *mutationResolver) ReceiveTask(ctx context.Context, task *model.TaskInpu
 	if err3 != nil {
 		res.Status = 1
 		res.Msg = "send task to worker error"
+		return res, err3
 	}
 
-	if err3 == nil {
-		taskDb := &model.Task{
-			ID:         taskID,
-			Name:       task.Name,
-			InstanceId: task.InstanceID,
-			BrokerId:   config.GetBrokerId(),
-			WorkerId:   task.WorkerID,
-			EntryId:    entryId,
-			Type:       task.Type,
-			Status:     1,
-			Cron:       task.Cron,
-			DNA:        task.Dna,
-			Mutation:   task.Mutation,
-			Remark:     task.Remark,
-			CreateAt:   timestamppb.Now(),
-			UpdateAt:   timestamppb.Now(),
-		}
+	taskDb := &model.Task{
+		ID:         taskID,
+		Name:       task.Name,
+		InstanceId: task.InstanceID,
+		BrokerId:   config.GetBrokerId(),
+		WorkerId:   task.WorkerID,
+		EntryId:    entryId,
+		Type:       task.Type,
+		Status:     1,
+		Cron:       task.Cron,
+		DNA:        task.Dna,
+		Mutation:   task.Mutation,
+		Remark:     task.Remark,
+		CreateAt:   timestamppb.Now(),
+		UpdateAt:   timestamppb.Now(),
+	}
 
-		taskService := service.Task{}
-		_, err2 := taskService.InsertOne(taskDb)
-		if err2 != nil {
-			res.Status = 1
-			res.Msg = "Broker DB error!"
+	taskService := service.Task{}
+	_, err2 := taskService.InsertOne(taskDb)
+	if err2 != nil {
+		res.Status = 1
+		res.Msg = "Broker DB error!"
 
-			return res, nil
-		}
+		return res, nil
 	}
 
 	//r.tasks = append(r.tasks, res)
@@ -371,6 +370,17 @@ func (r *queryResolver) GetTaskResultItems(ctx context.Context, page *model.GetT
 		PageSize: dbRes.PageSize,
 		Current:  dbRes.Current,
 		Items:    dbRes.Items,
+	}
+	return res, nil
+}
+
+func (r *queryResolver) GetLatestTaskResult(ctx context.Context, taskID *string) (*model.GetLatestTaskResultResponse, error) {
+	taskResultService := service.TaskResult{}
+	filter := bson.M{"task_id": *taskID}
+	dbRes, _ := taskResultService.FindOne(filter)
+
+	res := &model.GetLatestTaskResultResponse{
+		TaskResult: dbRes,
 	}
 	return res, nil
 }

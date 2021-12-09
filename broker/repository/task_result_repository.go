@@ -12,6 +12,7 @@ import (
 type TaskResultRepository interface {
 	OneKeyAnalyse(ctx context.Context, pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	InsertOne(ctx context.Context, tr *model.TaskResult) (*mongo.InsertOneResult, error)
+	FindOne(ctx context.Context, filter bson.M) (*model.TaskResult, error)
 	FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskResultItemsPage, error)
 }
 
@@ -50,6 +51,21 @@ func (r *TaskResultMongo) InsertOne(ctx context.Context, worker *model.TaskResul
 	log.Printf("[mgdb,save] info: %v", insertResult.InsertedID)
 
 	return insertResult, err
+}
+
+func (r *TaskResultMongo) FindOne(ctx context.Context, filter bson.M) (*model.TaskResult, error) {
+	var result model.TaskResult
+
+	err := r.Database.Collection("task_result").FindOne(ctx, filter).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return nil, nil
+	} else if err != nil {
+		log.Printf("[mgdb, findOne] error: %v", err)
+	}
+
+	log.Printf("[mgdb, findOne] info: %v", "success")
+
+	return &result, err
 }
 
 func (r *TaskResultMongo) FindAll(ctx context.Context, filter bson.M, page *model.PageableRequest) (*model.TaskResultItemsPage, error) {

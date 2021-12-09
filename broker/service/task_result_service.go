@@ -12,6 +12,7 @@ import (
 type TaskResultService interface {
 	OneKeyAnalyse(pipeline mongo.Pipeline) ([]*model.OneKeyAnalyse, error)
 	InsertOne(worker *model.TaskResult) (*mongo.InsertOneResult, error)
+	FindOne(filter bson.M) (*model.TaskResult, error)
 }
 
 type TaskResult struct {
@@ -26,6 +27,12 @@ func (s *TaskResult) InsertOne(tr *model.TaskResult) (*mongo.InsertOneResult, er
 	var taskResultRepo repository.TaskResultRepository = &repository.TaskResultMongo{Database: mgdb.Database}
 	return taskResultRepo.InsertOne(context.TODO(), tr)
 }
+
+func (s *TaskResult) FindOne(filter bson.M) (*model.TaskResult, error) {
+	var taskResultRepo repository.TaskResultRepository = &repository.TaskResultMongo{Database: mgdb.Database}
+	return taskResultRepo.FindOne(context.TODO(), filter)
+}
+
 func (s *TaskResult) FindAll(filter bson.M, page *model.PageableRequest) (*model.TaskResultItemsPage, error) {
 	var taskResultRepo repository.TaskResultRepository = &repository.TaskResultMongo{Database: mgdb.Database}
 	return taskResultRepo.FindAll(context.TODO(), filter, page)

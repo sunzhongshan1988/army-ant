@@ -50,6 +50,10 @@ type ComplexityRoot struct {
 		Total    func(childComplexity int) int
 	}
 
+	GetLatestTaskResultResponse struct {
+		TaskResult func(childComplexity int) int
+	}
+
 	Mutation struct {
 		KillTask    func(childComplexity int, task *model.TaskInstanceInput) int
 		ReceiveTask func(childComplexity int, task *model.TaskInput) int
@@ -66,6 +70,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetBrokerItems             func(childComplexity int, page *model.GetBrokerItemsInput) int
+		GetLatestTaskResult        func(childComplexity int, taskID *string) int
 		GetTaskItems               func(childComplexity int, page *model.GetTaskItemsInput) int
 		GetTaskOneKeyAnalyse       func(childComplexity int, key *string) int
 		GetTaskResultItems         func(childComplexity int, page *model.GetTaskResultItemsInput) int
@@ -113,6 +118,7 @@ type QueryResolver interface {
 	GetWorkerItems(ctx context.Context, page *model.GetWorkerItemsInput) (*model.WorkerPageResponse, error)
 	GetTaskItems(ctx context.Context, page *model.GetTaskItemsInput) (*model.TaskPageResponse, error)
 	GetTaskResultItems(ctx context.Context, page *model.GetTaskResultItemsInput) (*model.TaskResultPageResponse, error)
+	GetLatestTaskResult(ctx context.Context, taskID *string) (*model.GetLatestTaskResultResponse, error)
 }
 
 type executableSchema struct {
@@ -157,6 +163,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.BrokerPageResponse.Total(childComplexity), true
+
+	case "GetLatestTaskResultResponse.taskResult":
+		if e.complexity.GetLatestTaskResultResponse.TaskResult == nil {
+			break
+		}
+
+		return e.complexity.GetLatestTaskResultResponse.TaskResult(childComplexity), true
 
 	case "Mutation.killTask":
 		if e.complexity.Mutation.KillTask == nil {
@@ -245,6 +258,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetBrokerItems(childComplexity, args["page"].(*model.GetBrokerItemsInput)), true
+
+	case "Query.getLatestTaskResult":
+		if e.complexity.Query.GetLatestTaskResult == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getLatestTaskResult_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetLatestTaskResult(childComplexity, args["taskId"].(*string)), true
 
 	case "Query.getTaskItems":
 		if e.complexity.Query.GetTaskItems == nil {
@@ -486,6 +511,7 @@ type Query {
   getWorkerItems(page: GetWorkerItemsInput): WorkerPageResponse
   getTaskItems(page: GetTaskItemsInput): TaskPageResponse
   getTaskResultItems(page: GetTaskResultItemsInput): TaskResultPageResponse
+  getLatestTaskResult(taskId: String): GetLatestTaskResultResponse
  }
 
 # This is a mutation we will be doing
@@ -556,6 +582,10 @@ type TaskResultPageResponse {
   pageSize: Int!
   current: Int!
   items: [TaskResultScalar]
+}
+
+type GetLatestTaskResultResponse {
+  taskResult: TaskResultScalar
 }
 
 # receive a task
@@ -679,6 +709,21 @@ func (ec *executionContext) field_Query_getBrokerItems_args(ctx context.Context,
 		}
 	}
 	args["page"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getLatestTaskResult_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["taskId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("taskId"))
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["taskId"] = arg0
 	return args, nil
 }
 
@@ -930,6 +975,38 @@ func (ec *executionContext) _BrokerPageResponse_items(ctx context.Context, field
 	res := resTmp.([]*model.Broker)
 	fc.Result = res
 	return ec.marshalOBrokerScalar2ᚕᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐBroker(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GetLatestTaskResultResponse_taskResult(ctx context.Context, field graphql.CollectedField, obj *model.GetLatestTaskResultResponse) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "GetLatestTaskResultResponse",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaskResult, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.TaskResult)
+	fc.Result = res
+	return ec.marshalOTaskResultScalar2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_receive_task(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1469,6 +1546,45 @@ func (ec *executionContext) _Query_getTaskResultItems(ctx context.Context, field
 	res := resTmp.(*model.TaskResultPageResponse)
 	fc.Result = res
 	return ec.marshalOTaskResultPageResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐTaskResultPageResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getLatestTaskResult(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_getLatestTaskResult_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetLatestTaskResult(rctx, args["taskId"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.GetLatestTaskResultResponse)
+	fc.Result = res
+	return ec.marshalOGetLatestTaskResultResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetLatestTaskResultResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3434,6 +3550,30 @@ func (ec *executionContext) _BrokerPageResponse(ctx context.Context, sel ast.Sel
 	return out
 }
 
+var getLatestTaskResultResponseImplementors = []string{"GetLatestTaskResultResponse"}
+
+func (ec *executionContext) _GetLatestTaskResultResponse(ctx context.Context, sel ast.SelectionSet, obj *model.GetLatestTaskResultResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, getLatestTaskResultResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GetLatestTaskResultResponse")
+		case "taskResult":
+			out.Values[i] = ec._GetLatestTaskResultResponse_taskResult(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -3598,6 +3738,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getTaskResultItems(ctx, field)
+				return res
+			})
+		case "getLatestTaskResult":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getLatestTaskResult(ctx, field)
 				return res
 			})
 		case "__type":
@@ -4418,6 +4569,13 @@ func (ec *executionContext) unmarshalOGetBrokerItemsInput2ᚖgithubᚗcomᚋsunz
 	}
 	res, err := ec.unmarshalInputGetBrokerItemsInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOGetLatestTaskResultResponse2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetLatestTaskResultResponse(ctx context.Context, sel ast.SelectionSet, v *model.GetLatestTaskResultResponse) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._GetLatestTaskResultResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOGetTaskItemsInput2ᚖgithubᚗcomᚋsunzhongshan1988ᚋarmyᚑantᚋbrokerᚋmodelᚐGetTaskItemsInput(ctx context.Context, v interface{}) (*model.GetTaskItemsInput, error) {
