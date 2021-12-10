@@ -376,7 +376,8 @@ func (r *queryResolver) GetTaskResultItems(ctx context.Context, page *model.GetT
 
 func (r *queryResolver) GetLatestTaskResult(ctx context.Context, taskID *string) (*model.GetLatestTaskResultResponse, error) {
 	taskResultService := service.TaskResult{}
-	filter := bson.M{"task_id": *taskID}
+	id, _ := primitive.ObjectIDFromHex(*taskID)
+	filter := bson.M{"task_id": id}
 	dbRes, _ := taskResultService.FindOne(filter)
 
 	res := &model.GetLatestTaskResultResponse{
