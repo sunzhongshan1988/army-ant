@@ -1,5 +1,8 @@
 name: Release Binary Package
 on: 
+  push:
+    tags:
+      - '*'
   release:
     types: [created]
 
@@ -14,6 +17,9 @@ jobs:
         goarch: [amd64]
         project_path: ["./broker","./worker"]
     steps:
+    - name: Set output
+      id: vars
+      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@v1.22
       with:
@@ -23,5 +29,5 @@ jobs:
         project_path: ${{ matrix.project_path }}
         binary_name: "test-binary"
         extra_files: LICENSE README.md
-        asset_name: binary-name-${{ matrix.goos }}-${{ matrix.goarch }}-${{ github.ref }}
-        ldflags: "-X 'config.worker.Version=${{ github.ref }}' -X 'config.broker.Version=${{ github.ref }}'"
+        asset_name: binary-name-${{ matrix.goos }}-${{ matrix.goarch }}-${{ steps.vars.outputs.tag }}
+        ldflags: "-X 'config.worker.Version=${{ steps.vars.outputs.tag }}' -X 'config.broker.Version=${{ steps.vars.outputs.tag }}'"
