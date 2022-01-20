@@ -1,3 +1,4 @@
+name: Release Binary Package
 on: 
   release:
     types: [created]
