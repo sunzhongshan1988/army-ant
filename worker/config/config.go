@@ -27,7 +27,7 @@ func Init() {
 	worker.Address = os.Getenv("AAW_ADDRESS")
 	worker.Port = os.Getenv("AAW_PORT")
 	worker.Label = os.Getenv("AAW_LABEL")
-	worker.Version = ""
+	worker.Version = "0.0.1"
 
 	jsonStr, _ := json.Marshal(worker)
 	log.Printf("[config, init] info: %v", string(jsonStr))

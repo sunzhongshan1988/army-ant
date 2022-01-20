@@ -31,7 +31,7 @@ func Init() {
 	// example: "mongodb://armyant:P@ssw0rd@10.11.51.152:27017/armyant_dev?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
 	broker.MongodbUri = os.Getenv("AAB_MONGODB_URI")
 	broker.MongodbDatabase = os.Getenv("AAB_MONGODB_DATABASE") // mongodb database name
-	broker.Version = ""
+	broker.Version = "0.0.1"
 
 	jsonStr, _ := json.Marshal(broker)
 	log.Printf("[config, init] info: %v", string(jsonStr))
