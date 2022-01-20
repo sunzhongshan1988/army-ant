@@ -1,8 +1,5 @@
 name: Release Binary Package
 on: 
-  push:
-    tags:
-      - '*'
   release:
     types: [created]
 
