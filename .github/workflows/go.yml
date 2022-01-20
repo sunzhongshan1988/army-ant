@@ -1,0 +1,26 @@
+on: 
+  release:
+    types: [created]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64, windows/amd64
+        goos: [linux, windows]
+        goarch: [amd64]
+        project_path: ["./broker","./worker"]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: wangyoucao577/go-release-action@v1.22
+      with:
+        github_token: ${{ secrets.GH_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        project_path: ${{ matrix.project_path }}
+        binary_name: "test-binary"
+        extra_files: LICENSE README.md
+        asset_name: binary-name-${{ matrix.goos }}-${{ matrix.goarch }}-${{ github.ref }}
+        ldflags: "-X 'config.worker.Version=${{ github.ref }}' -X 'config.broker.Version=${{ github.ref }}'"
