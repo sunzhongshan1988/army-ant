@@ -15,7 +15,7 @@ jobs:
         # build and publish in parallel: linux/amd64, windows/amd64
         goos: [linux, windows]
         goarch: [amd64]
-        project_path: ["./broker","./worker"]
+        project_path: ["broker","worker"]
     steps:
     - name: Set output
       id: vars
@@ -26,8 +26,8 @@ jobs:
         github_token: ${{ secrets.GH_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        project_path: ${{ matrix.project_path }}
-        binary_name: "test-binary"
+        project_path: "./${{ matrix.project_path }}"
+        binary_name: ${{ matrix.project_path }}
         extra_files: LICENSE README.md
-        asset_name: binary-name-${{ matrix.goos }}-${{ matrix.goarch }}-${{ steps.vars.outputs.tag }}
+        asset_name: ${{ matrix.project_path }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ steps.vars.outputs.tag }}
         ldflags: "-X 'config.worker.Version=${{ steps.vars.outputs.tag }}' -X 'config.broker.Version=${{ steps.vars.outputs.tag }}'"
