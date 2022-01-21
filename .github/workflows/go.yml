@@ -16,7 +16,10 @@ jobs:
     steps:
     - name: Set output
       id: vars
-      run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      run: |
+        echo "::set-output name=tag::${GITHUB_REF#refs/*/}"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        echo "::set-output name=date::$(date '+%Y-%m-%dT%H:%M:%S')"
     - uses: actions/checkout@v2
     - uses: wangyoucao577/go-release-action@v1.22
       with:
@@ -28,4 +31,4 @@ jobs:
         binary_name: ${{ matrix.project_path }}
         extra_files: LICENSE README.md
         asset_name: ${{ matrix.project_path }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ steps.vars.outputs.tag }}
-        ldflags: "-X 'config.worker.Version=${{ steps.vars.outputs.tag }}' -X 'config.broker.Version=${{ steps.vars.outputs.tag }}'"
+        ldflags: "-X 'config.Version=${{ steps.vars.outputs.tag }}' -X 'config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X 'config.BuildTimestamp=${{ steps.vars.outputs.date }}'"
