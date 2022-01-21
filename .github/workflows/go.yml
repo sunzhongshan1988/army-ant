@@ -17,6 +17,7 @@ jobs:
     - name: Set output
       id: vars
       run: |
+        echo "::set-output name=pkg::'github.com/sunzhongshan1988/army-ant'"
         echo "::set-output name=tag::${GITHUB_REF#refs/*/}"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
         echo "::set-output name=date::$(date '+%Y-%m-%dT%H:%M:%S')"
@@ -31,4 +32,4 @@ jobs:
         binary_name: ${{ matrix.project_path }}
         extra_files: LICENSE README.md
         asset_name: ${{ matrix.project_path }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ steps.vars.outputs.tag }}
-        ldflags: "-X 'config.Version=${{ steps.vars.outputs.tag }}' -X 'config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X 'config.BuildTimestamp=${{ steps.vars.outputs.date }}'"
+        ldflags: "-X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.Version=${{ steps.vars.outputs.tag }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.BuildTimestamp=${{ steps.vars.outputs.date }}'"
