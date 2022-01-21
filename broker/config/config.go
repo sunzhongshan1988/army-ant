@@ -15,7 +15,6 @@ type Broker struct {
 	GraphqlPort     string `json:"graphqlPort"`
 	MongodbUri      string `json:"mongodbUri"`
 	MongodbDatabase string `json:"mongodbDatabase"`
-	Version         string `json:"version"`
 }
 
 var broker = &Broker{}
@@ -31,7 +30,6 @@ func Init() {
 	// example: "mongodb://armyant:P@ssw0rd@10.11.51.152:27017/armyant_dev?authSource=admin&readPreference=primary&appname=ArmyAnt&ssl=false"
 	broker.MongodbUri = os.Getenv("AAB_MONGODB_URI")
 	broker.MongodbDatabase = os.Getenv("AAB_MONGODB_DATABASE") // mongodb database name
-	//broker.Version = "0.0.1"
 
 	jsonStr, _ := json.Marshal(broker)
 	log.Printf("[config, init] info: %v", string(jsonStr))
@@ -77,8 +75,4 @@ func GetMongodbUri() string {
 
 func GetMongodbDatabase() string {
 	return broker.MongodbDatabase
-}
-
-func GetVersion() string {
-	return broker.Version
 }

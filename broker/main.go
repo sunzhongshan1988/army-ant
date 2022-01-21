@@ -13,6 +13,8 @@ import (
 func main() {
 	log.Printf("------------Broker Started!------------")
 
+	config.ShowVersion()
+
 	// Initialized config
 	config.Init()
 

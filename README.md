@@ -15,7 +15,7 @@ go env
 $env:GOARCH = "amd64"
 $env:GOOS = "linux"
 
-go build
+go build ldflags="-X 'config.Version=${{ }}' -X 'config..CommitHash=${{}}' -X 'config..CommitHash=${{ }}'"
 ```
 # Deploy
 ## Environment Variables

@@ -14,7 +14,6 @@ type Worker struct {
 	Address    string `json:"address"`
 	Port       string `json:"port"`
 	Label      string `json:"label"`
-	Version    string `json:"version"`
 }
 
 var worker = &Worker{}
@@ -27,7 +26,6 @@ func Init() {
 	worker.Address = os.Getenv("AAW_ADDRESS")
 	worker.Port = os.Getenv("AAW_PORT")
 	worker.Label = os.Getenv("AAW_LABEL")
-	//worker.Version = "0.0.1"
 
 	jsonStr, _ := json.Marshal(worker)
 	log.Printf("[config, init] info: %v", string(jsonStr))
@@ -72,8 +70,4 @@ func GetWorkerLink() string {
 
 func GetLabel() string {
 	return worker.Label
-}
-
-func GetVersion() string {
-	return worker.Version
 }

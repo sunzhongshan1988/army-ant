@@ -29,6 +29,8 @@ import (
 
 func main() {
 	log.Printf("------------Worker Started!------------")
+	// print version information.
+	config.ShowVersion()
 
 	config.Init()
 
