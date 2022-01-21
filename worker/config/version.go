@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"log"
+)
 
 var (
 	Version        = "0.0.1"
@@ -8,8 +10,8 @@ var (
 	BuildTimestamp = "n/a"
 )
 
-func ShowVersion() string {
-	return fmt.Sprintf("%s-%s (%s)", Version, CommitHash, BuildTimestamp)
+func ShowVersion() {
+	log.Printf("%s-%s (%s)", Version, CommitHash, BuildTimestamp)
 }
 
 func GetVersion() string {
