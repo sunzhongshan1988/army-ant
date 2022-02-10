@@ -36,7 +36,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build $app/main.go -v -o $app -ldflags=$ldflags
+RUN go build -v -o $app -ldflags=$ldflags $app/main.go
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
