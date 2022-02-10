@@ -1,0 +1,37 @@
+name: Docker Image(ACR) CI
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+
+  build:
+    name: Make broker docker image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64
+        goos: [linux]
+        goarch: [amd64]
+        project_path: ["broker"]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set output
+      id: vars
+      run: |
+        echo "::set-output name=pkg::github.com/sunzhongshan1988/army-ant"
+        echo "::set-output name=tag::${GITHUB_REF#refs/*/}"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        echo "::set-output name=date::$(date '+%Y-%m-%dT%H:%M:%S')"
+    - name: Login to Aliyun Container Registry(ACR)
+      uses: aliyun/acr-login@v1
+      with:
+        login-server: https://registry.cn-shanghai.aliyuncs.com
+        username: ${{ secrets.JN_ACR_USERNAME }}
+        password: ${{ secrets.JN_ACR_PASSWORD }}
+    - name: Build and Push the Docker image
+      run: |
+        docker build . --file Dockerfile  --build-arg app=${{ matrix.project_path }} --build-arg ldflags="-X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.Version=${{ steps.vars.outputs.tag }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.BuildTimestamp=${{ steps.vars.outputs.date }}'" --tag registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:${{ steps.vars.outputs.tag }}
+        docker push registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:${{ steps.vars.outputs.tag }}
