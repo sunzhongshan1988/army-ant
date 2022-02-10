@@ -21,7 +21,7 @@
 FROM golang:1.17-buster as builder
 
 ARG app=broker
-ARG ldflags="-X 'package_path.variable_name=new_value'"
+ARG ldflags="-X 'github.com/sunzhongshan1988/army-ant/broker/config.Version=0.0.10' -X 'github.com/sunzhongshan1988/army-ant/broker/config.CommitHash=951d06f' -X 'github.com/sunzhongshan1988/army-ant/broker/config.BuildTimestamp=2022-02-10T08:15:39'"
 
 # Create and change to the app directory.
 WORKDIR /app
@@ -36,7 +36,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -v -o $app -ldflags=$ldflags $app/main.go
+RUN go build -v -o $app -ldflags="$ldflags" $app/main.go
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
