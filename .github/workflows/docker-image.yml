@@ -33,5 +33,5 @@ jobs:
         password: ${{ secrets.JN_ACR_PASSWORD }}
     - name: Build and Push the Docker image
       run: |
-        docker build . --file Dockerfile  --build-arg app=${{ matrix.project_path }} --build-arg ldflags="-X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.Version=${{ steps.vars.outputs.tag }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.BuildTimestamp=${{ steps.vars.outputs.date }}'" --tag registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:${{ steps.vars.outputs.tag }}
-        docker push registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:${{ steps.vars.outputs.tag }}
+        docker build . --file Dockerfile  --build-arg app=${{ matrix.project_path }} --build-arg ldflags="-X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.Version=${{ steps.vars.outputs.tag }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.CommitHash=${{ steps.vars.outputs.sha_short }}' -X '${{ steps.vars.outputs.pkg }}/${{ matrix.project_path }}/config.BuildTimestamp=${{ steps.vars.outputs.date }}'" --tag registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:v${{ steps.vars.outputs.tag }}
+        docker push registry.cn-shanghai.aliyuncs.com/jiniu_devops/armyant-${{ matrix.project_path }}:v${{ steps.vars.outputs.tag }}
