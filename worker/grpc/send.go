@@ -49,7 +49,8 @@ func Register() {
 
 	config.SetBrokerId(r.BrokerId)
 	config.SetWorkerId(r.WorkerId)
-	config.SetBrokerLink(r.BrokerLink)
+	// When the broker is in k8s, the internal and external connections may be inconsistent
+	// config.SetBrokerLink(r.BrokerLink)
 
 }
 
