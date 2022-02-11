@@ -53,7 +53,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	worker := &model.Worker{
 		BrokerId:    "",
 		BrokerLink:  config.GetGrpcLink(),
-		WorkerId:    "",
+		WorkerId:    in.WorkerId,
 		WorkerLink:  in.WorkerLink,
 		WorkerLabel: in.WorkerLabel,
 		Version:     in.WorkerVersion,
@@ -63,11 +63,10 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 	}
 
 	// Query Database
-	filter := bson.M{"worker_link": in.WorkerLink, "worker_label": in.WorkerLabel}
+	filter := bson.M{"worker_id": in.WorkerId}
 	r, _ := workerService.FindOne(filter)
 	if r != nil {
 		worker.BrokerId = r.BrokerId
-		worker.WorkerId = r.WorkerId
 
 		// Update task status, if task is running(code 1) then set status as suspend(code: 3)
 		filter1 := bson.M{"worker_id": r.WorkerId, "status": 1}
@@ -76,7 +75,7 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 
 		// Update worker status and update time
 		filter2 := bson.M{"worker_id": r.WorkerId}
-		update2 := bson.M{"$set": bson.M{"status": 1, "update_at": worker.UpdateAt, "version": worker.Version}}
+		update2 := bson.M{"$set": bson.M{"status": 1, "worker_link": in.WorkerLink, "worker_label": in.WorkerLabel, "update_at": worker.UpdateAt, "version": worker.Version}}
 		_, _ = workerService.UpdateOne(filter2, update2)
 
 	} else {

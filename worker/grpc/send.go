@@ -28,7 +28,8 @@ func Register() {
 
 	request := &pb.RegisterRequest{
 		Auth:          "#shdk687dHHhiJHDHDHH",
-		WorkerType:    pb.WorkerType_IDC,
+		WorkerId:      config.GetWorkerId(),
+		WorkerType:    pb.WorkerType_HOST,
 		WorkerLink:    config.GetWorkerLink(),
 		Content:       "",
 		WorkerLabel:   config.GetLabel(),

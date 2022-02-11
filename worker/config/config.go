@@ -19,8 +19,8 @@ type Worker struct {
 var worker = &Worker{}
 
 func Init() {
-	worker.WorkerId = ""
-	worker.WorkerType = "g"
+	worker.WorkerId = os.Getenv("AAW_ID")
+	worker.WorkerType = "host"
 	worker.BrokerId = ""
 	worker.BrokerLink = os.Getenv("AAW_BROKER_LINK")
 	worker.Address = os.Getenv("AAW_ADDRESS")

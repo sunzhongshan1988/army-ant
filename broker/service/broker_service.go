@@ -47,12 +47,11 @@ func (s *Broker) FindAll(filter bson.M, page *model.PageableRequest) (*model.Bro
 
 func (s *Broker) Register() {
 	// Query Database
-	filter := bson.M{"broker_link": config.GetGrpcLink(), "broker_label": config.GetBrokerLabel()}
+	filter := bson.M{"broker_id": config.GetBrokerId()}
 	r, _ := s.FindOne(filter)
 	if r != nil {
-		config.SetBrokerId(r.BrokerId)
 		filter1 := bson.M{"broker_id": r.BrokerId}
-		update := bson.M{"$set": bson.M{"status": 1, "update_at": timestamppb.Now(), "version": config.GetVersion()}}
+		update := bson.M{"$set": bson.M{"status": 1, "broker_link": config.GetGrpcLink(), "broker_label": config.GetBrokerLabel(), "update_at": timestamppb.Now(), "version": config.GetVersion()}}
 		_, _ = s.UpdateOne(filter1, update)
 	} else {
 		config.SetBrokerId(uuid.New().String())

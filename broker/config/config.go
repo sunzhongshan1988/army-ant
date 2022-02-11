@@ -21,7 +21,7 @@ var broker = &Broker{}
 
 func Init() {
 	broker.Label = os.Getenv("AAB_LABEL") // "system"
-	broker.BrokerId = ""
+	broker.BrokerId = os.Getenv("AAB_ID")
 	broker.BrokerType = "main"
 	broker.Address = os.Getenv("AAB_ADDRESS")          // "127.0.0.1"
 	broker.GrpcPort = os.Getenv("AAB_GRPC_PORT")       // "50051"

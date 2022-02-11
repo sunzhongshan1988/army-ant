@@ -19,10 +19,11 @@ go build ldflags="-X 'config.Version=${{ }}' -X 'config..CommitHash=${{}}' -X 'c
 ```
 # Deploy
 ## Environment Variables
-For Broker and Worker, 'label' and 'address:port' is the only basis for distinguishing the same instance,
+For Broker and Worker, 'ID' is the only basis for distinguishing the same instance,
  and the change will be regarded as a new instance.
 ### Broker
     AAB_LABEL            Broekr label
+    AAB_ID               Broker ID
 	AAB_ADDRESS          Broker address
 	AAB_GRPC_PORT        Broker Grpc listen port
 	AAB_GRAPHQL_PORT     Broekr GraphQL listen port
@@ -30,6 +31,7 @@ For Broker and Worker, 'label' and 'address:port' is the only basis for distingu
     AAB_MONGODB_DATABASE Mongo Database Name
 ### Worker
     AAW_BROKER_LINK     Worker link broker
+    AAW_ID              Worker ID
     AAW_ADDRESS         Worker address
     AAW_PORT            Worker listen port
     AAW_LABEL           Worker label

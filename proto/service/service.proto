@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "me.mozhengxi.armyant/proto/service";
+option go_package = "github.com/sunzhongshan1988/army-ant/proto/service";
 option java_multiple_files = true;
 option java_package = "me.mozhengxi.armyant.proto.service";
 option java_outer_classname = "ProtoService";
@@ -25,14 +25,14 @@ service Greeter {
 * Worker register
 */
 enum WorkerType {
-  LOCAL = 0;
-  IDC = 1;
-  REMOTE = 2;
+  HOST = 0;
+  CONTAINER = 1;
 }
 message RegisterRequest {
   string auth = 1;
   WorkerType worker_type = 4;
   string content = 8;
+  string worker_id = 9;
   string worker_link = 10;
   string worker_label = 11;
   string worker_version = 14;
