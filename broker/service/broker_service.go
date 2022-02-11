@@ -54,7 +54,9 @@ func (s *Broker) Register() {
 		update := bson.M{"$set": bson.M{"status": 1, "broker_link": config.GetGrpcLink(), "broker_label": config.GetBrokerLabel(), "update_at": timestamppb.Now(), "version": config.GetVersion()}}
 		_, _ = s.UpdateOne(filter1, update)
 	} else {
-		config.SetBrokerId(uuid.New().String())
+		if config.GetBrokerId() == "" {
+			config.SetBrokerId(uuid.New().String())
+		}
 		// Save worker's information to DB
 		broker := &model.Broker{
 			BrokerId:    config.GetBrokerId(),

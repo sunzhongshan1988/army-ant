@@ -75,12 +75,14 @@ func (s *server) WorkerRegister(ctx context.Context, in *pb.RegisterRequest) (*p
 
 		// Update worker status and update time
 		filter2 := bson.M{"worker_id": r.WorkerId}
-		update2 := bson.M{"$set": bson.M{"status": 1, "worker_link": in.WorkerLink, "worker_label": in.WorkerLabel, "update_at": worker.UpdateAt, "version": worker.Version}}
+		update2 := bson.M{"$set": bson.M{"status": 1, "worker_link": worker.WorkerLink, "worker_label": worker.WorkerLabel, "update_at": worker.UpdateAt, "version": worker.Version}}
 		_, _ = workerService.UpdateOne(filter2, update2)
 
 	} else {
 		worker.BrokerId = config.GetBrokerId()
-		worker.WorkerId = uuid.New().String()
+		if worker.WorkerId == "" {
+			worker.WorkerId = uuid.New().String()
+		}
 
 		// Save worker's information to DB
 		_, _ = workerService.InsertOne(worker)
