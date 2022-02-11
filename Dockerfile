@@ -44,6 +44,7 @@ RUN go build -v -o $app -ldflags="$ldflags" $app/main.go
 FROM debian:buster-slim
 
 ARG app=broker
+ENV APP=$app
 
 RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     ca-certificates && \
@@ -53,7 +54,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
 COPY --from=builder /app/$app /app/$app
 
 # Run the web service on container startup.
-CMD ["/app/$app"]
+CMD ["/app/${APP}"]
 
 # [END run_helloworld_dockerfile]
 # [END cloudrun_helloworld_dockerfile]
