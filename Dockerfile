@@ -36,7 +36,7 @@ RUN go mod download
 COPY . ./
 
 # Build the binary.
-RUN go build -v -o $app -ldflags="$ldflags" $app/main.go
+RUN go build -v -o armyant-$app -ldflags="$ldflags" $app/main.go
 
 # Use the official Debian slim image for a lean production container.
 # https://hub.docker.com/_/debian
@@ -50,7 +50,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     rm -rf /var/lib/apt/lists/*
 
 # Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/$app /app/armyant
+COPY --from=builder /app/armyant-$app /app/armyant
 
 # Run the web service on container startup.
 CMD ["/app/armyant"]
